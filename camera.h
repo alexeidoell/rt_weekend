@@ -4,11 +4,13 @@
 #include "color3.h"
 #include "hittable.h"
 #include "vec3.h"
+#include "material.h"
+
 class camera {
 public:
     static constexpr double aspect_ratio = 16.0 / 9.0;
-    static constexpr int image_width = 3840;
-    static constexpr int samples_per_pixel = 500;
+    static constexpr int image_width = 1920;
+    static constexpr int samples_per_pixel = 10;
     static constexpr int max_depth = 100;
 
     void render(const hittable& world) {
@@ -65,8 +67,13 @@ private:
         }
         hit_record rec;
         if (world.hit(r, interval(0.001, infinity), rec)) {
-            vec3 direction = random_on_hemisphere(rec.normal);
-            return 0.5 * ray_color(ray(rec.p, direction), world, depth + 1);
+            ray scattered;
+            color3 attenuation;
+
+            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+                return attenuation * ray_color(scattered, world, depth + 1);
+            }
+            return color3(0,0,0);
         }
 
         vec3 unit_vec = unit_vector(r.direction());
