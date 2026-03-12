@@ -20,7 +20,7 @@ public:
     lambertian(const color3& albedo) : albedo(albedo) {}
     bool scatter(const ray& r_in, const hit_record& rec, color3& attenuation, ray& scattered) const override {
         double random = random_double(0, 1);
-        if (random < 0.3) {
+        if (random < -0.3) {
             return false;
         }
         auto scatter_direction = rec.normal + random_unit_vector();
@@ -68,12 +68,26 @@ public:
         double ri = rec.front_face ? (1.0/refraction_index) : refraction_index;
 
         vec3 unit_direction = unit_vector(r_in.direction());
-        vec3 refracted = refract(unit_direction, rec.normal, ri);
+        double cos_theta = std::fmin(dot(-unit_direction, rec.normal), 1.0);
+        double sin_theta = std::sqrt(1.0 - cos_theta*cos_theta);
+        vec3 direction;
 
-        scattered = ray(rec.p, refracted);
+        if (ri * sin_theta > 1.0 || reflectance(cos_theta, ri) > random_double()) { // cannot refract
+            direction = reflect(unit_direction, rec.normal);
+        } else {
+            direction = refract(unit_direction, rec.normal, ri);
+
+        }
+        scattered = ray(rec.p, direction);
         return true;
     }
 
 private:
     double refraction_index;
+
+    static double reflectance(double cosine, double ri) {
+        auto r0 = (1-ri) / (1+ri);
+        r0 = r0*r0;
+        return r0 + (1-r0) * std::pow((1 - cosine), 5);
+    }
 };
