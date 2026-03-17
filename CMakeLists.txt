@@ -5,10 +5,14 @@ cmake_minimum_required(VERSION 3.15...4.1)
 project(rt_weekend VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/..)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
 add_executable(rt_weekend
     src/main.cpp
     src/camera.cpp
+    src/sphere.cpp
+    src/tri.cpp
+    src/material.cpp
     src/hittable.cpp
 )
 

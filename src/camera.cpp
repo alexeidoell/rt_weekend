@@ -23,7 +23,7 @@ void camera::render(const hittable& world) {
             for (int t = 0; t < thread_count; t++) {
                 result[j * image_width + i] += thread_buffers[t][j * image_width + i];
             }
-            result[j * image_width + i] *= pixel_samples_scale;
+            result[j * image_width + i] *= (1.0 / thread_count);
             write_color(std::cout, result[j * image_width + i]);
         }
     }
@@ -31,9 +31,13 @@ void camera::render(const hittable& world) {
 
 }
 
-
-
 void camera::initialize() {
+
+    image_height = calculate_height(image_width, aspect_ratio);
+    viewport_height = calculate_viewport_height();
+    viewport_width = viewport_height * (double(image_width) / image_height);
+    camera_center = lookfrom;
+    pixel_samples_scale = 1.0 / samples_per_pixel;
     w = unit_vector(lookfrom - lookat);
     u = unit_vector(cross(vup, w));
     v = cross(w, u);
@@ -76,10 +80,11 @@ color3 camera::ray_color(const ray& r, const hittable& world, int depth) const {
     auto rec = world.hit(r, interval(0.001, infinity));
     if (rec) {
         auto scatter_result = rec->mat_ptr->scatter(r, *rec);
+        color3 emitted = rec->mat_ptr->emitted();
         if (scatter_result) {
-            return scatter_result->first * ray_color(scatter_result->second, world, depth + 1);
+            return emitted + scatter_result->first * ray_color(scatter_result->second, world, depth + 1);
         }
-        return color3(0,0,0);
+        return emitted;
     }
 
     vec3 unit_vec = unit_vector(r.direction());
@@ -95,7 +100,7 @@ ray camera::get_ray(int i, int j) const {
         + ((j + offset.y()) * pixel_delta_v);
 
     point3 ray_origin;
-    if constexpr(defocus_angle <= 0) {
+    if (defocus_angle <= 0) {
         ray_origin = camera_center;
     } else {
         ray_origin = defocus_disk_sample();

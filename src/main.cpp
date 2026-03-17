@@ -1,36 +1,16 @@
 #include <memory>
 #include "camera.h"
+#include "material.h"
+#include "tri.h"
 #include "vec3.h"
 #include "color3.h"
 #include "hittable.h"
 #include "common.h"
 #include "sphere.h"
 
-int main() {
+void bouncing_spheres() {
 
     hittable_list world;
-
-    /*
-    auto material_ground = std::make_shared<lambertian>(color3(0.8, 0.8, 0.0));
-    auto material_center = std::make_shared<lambertian>(color3(0.1, 0.2, 0.5));
-    auto material_left   = std::make_shared<dielectric>(1.5);
-    auto material_bubble   = std::make_shared<dielectric>(1.00/1.5);
-    auto material_right  = std::make_shared<metal>(color3(0.8, 0.6, 0.2), 0.1);
-
-    world.add(std::unique_ptr<hittable>(new sphere(point3(0,0, -1.2), 0.5, material_center)));
-    world.add(std::unique_ptr<hittable>(new sphere(point3(-1,0, -1), 0.5, material_left)));
-    world.add(std::unique_ptr<hittable>(new sphere(point3(1,0, -1), 0.5, material_right)));
-    world.add(std::unique_ptr<hittable>(new sphere(point3(-1,0, -1), 0.4, material_bubble)));
-    world.add(std::unique_ptr<hittable>(new sphere(point3(0,-100.5, -1), 100, material_ground)));
-
-    auto R = std::cos(pi/4);
-
-    auto material_left  = std::make_shared<lambertian>(color3(0,0,1));
-    auto material_right = std::make_shared<lambertian>(color3(1,0,0));
-
-    world.add(std::unique_ptr<hittable>(new sphere(point3(-R,0, -1), R, material_left)));
-    world.add(std::unique_ptr<hittable>(new sphere(point3(R,0, -1), R, material_right)));
-    */
 
     auto ground_material = std::make_shared<lambertian>(color3(0.5, 0.5, 0.5));
     world.add(std::unique_ptr<hittable>(new sphere(point3(0,-1000,0), 1000, ground_material)));
@@ -41,7 +21,6 @@ int main() {
 
             if ((center - point3(4, 0.2, 0)).length() > 0.9) {
                 std::shared_ptr<material> sphere_material;
-
                 if (choose_mat < 0.8) {
                     // diffuse
                     auto albedo = color3::random() * color3::random();
@@ -73,5 +52,57 @@ int main() {
 
     camera cam;
 
+    cam.aspect_ratio      = 16.0 / 9.0;
+    cam.image_width       = 400;
+    cam.samples_per_pixel = 5;
+    cam.max_depth         = 50;
+
+    cam.vfov     = 20;
+    cam.lookfrom = point3(13,2,3);
+    cam.lookat   = point3(0,0,0);
+    cam.vup      = vec3(0,1,0);
+
+    cam.defocus_angle = 0.6;
+    cam.focus_dist    = 10.0;
+
     cam.render(world);
+}
+
+void quads() {
+    hittable_list world;
+
+    // Materials
+    auto left_red     = std::make_shared<lambertian>(color3(1.0, 0.2, 0.2));
+    auto back_green   = std::make_shared<lambertian>(color3(0.2, 1.0, 0.2));
+    auto right_blue   = std::make_shared<lambertian>(color3(0.2, 0.2, 1.0));
+    auto upper_orange = std::make_shared<lambertian>(color3(1.0, 0.5, 0.0));
+    auto lower_teal   = std::make_shared<lambertian>(color3(0.2, 0.8, 0.8));
+
+    // Quads
+    world.add(std::unique_ptr<hittable>(new quad(point3(-3,-2, 5), vec3(0, 0,-4), vec3(0, 4, 0), left_red)));
+    world.add(std::unique_ptr<hittable>(new quad(point3(-2,-2, 0), vec3(4, 0, 0), vec3(0, 4, 0), back_green)));
+    world.add(std::unique_ptr<hittable>(new quad(point3( 3,-2, 1), vec3(0, 0, 4), vec3(0, 4, 0), right_blue)));
+    world.add(std::unique_ptr<hittable>(new quad(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4), upper_orange)));
+    world.add(std::unique_ptr<hittable>(new quad(point3(-2,-3, 5), vec3(4, 0, 0), vec3(0, 0,-4), lower_teal)));
+
+    camera cam;
+
+    cam.aspect_ratio      = 1.0;
+    cam.image_width       = 400;
+    cam.samples_per_pixel = 5;
+    cam.max_depth         = 50;
+
+    cam.vfov     = 80;
+    cam.lookfrom = point3(0,0,9);
+    cam.lookat   = point3(0,0,0);
+    cam.vup      = vec3(0,1,0);
+
+    cam.defocus_angle = 0;
+
+    cam.render(world);
+}
+
+int main() {
+    bouncing_spheres();
+    //quads();
 }

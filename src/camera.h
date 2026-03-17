@@ -15,13 +15,13 @@ inline constexpr double calculate_height(double image_width, double aspect_ratio
 
 class camera {
 public:
-    static constexpr double aspect_ratio = 16.0 / 9.0;
-    static constexpr int image_width = 1200;
-    static constexpr int samples_per_pixel = 1;
-    static constexpr int max_depth = 50;
-    static constexpr int vfov = 20;
-    static constexpr double defocus_angle = 0.6;
-    static constexpr double focus_dist = 10.0;
+    double aspect_ratio = 16.0 / 9.0;
+    int image_width = 1200;
+    int samples_per_pixel = 5;
+    int max_depth = 50;
+    int vfov = 20;
+    double defocus_angle = 0.6;
+    double focus_dist = 10.0;
 
     point3 lookfrom = point3(13,2,3);
     point3 lookat = point3(0,0,0);
@@ -32,18 +32,18 @@ public:
 
 
 private:
-    static constexpr double calculate_viewport_height() {
+    constexpr double calculate_viewport_height() {
         double theta = degrees_to_radians(vfov);
         double h = std::tan(theta/2);
         return 2 * h * focus_dist;
 
     }
 
-    static constexpr int image_height = calculate_height(image_width, aspect_ratio);
-    double viewport_height = calculate_viewport_height();
-    double viewport_width = viewport_height * (double(image_width) / image_height);
-    point3 camera_center = lookfrom;
-    double pixel_samples_scale = 1.0 / samples_per_pixel;
+    int image_height;
+    double viewport_height;
+    double viewport_width;
+    point3 camera_center;
+    double pixel_samples_scale;
 
     vec3 pixel_delta_u, pixel_delta_v;
     point3 pixel00_loc;
@@ -51,7 +51,7 @@ private:
 
     vec3 defocus_disk_u, defocus_disk_v;
 
-    static const int thread_count = 12;
+    static const int thread_count = 1;
     std::array<std::thread, thread_count> render_threads;
     std::array<std::vector<color3>, thread_count> thread_buffers;
     std::vector<color3> result;

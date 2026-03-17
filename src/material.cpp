@@ -1,0 +1,48 @@
+#include "material.h"
+
+tiny::optional<std::pair<color3, ray>> lambertian::scatter(const ray& r_in, const hit_record& rec) const {
+    double random = random_double(0, 1);
+    if (random < -0.3) {
+        return std::nullopt;
+    }
+    auto scatter_direction = rec.normal + random_unit_vector();
+
+    if (scatter_direction.near_zero())
+        scatter_direction = rec.normal;
+
+    return tiny::make_optional<std::pair<color3,ray>>(albedo, ray(rec.p, scatter_direction));
+}
+
+tiny::optional<std::pair<color3, ray>> metal::scatter(const ray& r_in, const hit_record& rec) const {
+    vec3 reflected = reflect(r_in.direction(), rec.normal);
+    reflected = unit_vector(reflected) + fuzz * random_unit_vector();
+    if (dot(reflected, rec.normal) > 0) {
+        return tiny::make_optional<std::pair<color3,ray>>(albedo, ray(rec.p, reflected));
+    }
+    return std::nullopt;
+}
+
+tiny::optional<std::pair<color3, ray>> dielectric::scatter(const ray& r_in, const hit_record& rec) const {
+    double ri = rec.front_face ? (1.0/refraction_index) : refraction_index;
+
+    vec3 unit_direction = unit_vector(r_in.direction());
+    double cos_theta = std::fmin(dot(-unit_direction, rec.normal), 1.0);
+    double sin_theta = std::sqrt(1.0 - cos_theta*cos_theta);
+    vec3 direction;
+
+    if (ri * sin_theta > 1.0 || reflectance(cos_theta, ri) > random_double()) { // cannot refract
+        direction = reflect(unit_direction, rec.normal);
+    } else {
+        direction = refract(unit_direction, rec.normal, ri);
+
+    }
+    return tiny::make_optional<std::pair<color3,ray>>(color3(1.0,1.0,1.0), ray(rec.p, direction));
+}
+
+tiny::optional<std::pair<color3, ray>> diffuse_light::scatter(const ray& r_in, const hit_record& rec) const {
+    return std::nullopt;
+}
+
+color3 diffuse_light::emitted() const {
+    return emitted_color;
+}
