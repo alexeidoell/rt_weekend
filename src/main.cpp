@@ -1,12 +1,8 @@
-#include <iostream>
 #include <memory>
-#include <optional>
 #include "camera.h"
 #include "vec3.h"
-#include "ray.h"
 #include "color3.h"
 #include "hittable.h"
-#include "hittable_list.h"
 #include "common.h"
 #include "sphere.h"
 

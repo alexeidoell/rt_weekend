@@ -4,12 +4,13 @@
 #include "hittable.h"
 #include "vec3.h"
 #include <memory>
+#include "../tiny-optional/include/tiny/optional.h"
 
 class sphere : public hittable {
 public:
     sphere(const point3& center, double radius, std::shared_ptr<material> mat_ptr) : center(center), radius(std::fmax(0,radius)), mat_ptr(mat_ptr) {}
 
-    bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+    tiny::optional<hit_record> hit(const ray& r, interval ray_t) const override {
         vec3 oc = center - r.origin();
         auto a = r.direction().length_squared();
         auto h = dot(r.direction(), oc);
@@ -18,7 +19,7 @@ public:
 
         auto discriminant = h*h - a*c;
         if (discriminant < 0)
-            return false;
+            return std::nullopt;
 
         auto sqrtd = std::sqrt(discriminant);
 
@@ -27,17 +28,14 @@ public:
         if (!ray_t.surrounds(root)) {
             root = (h + sqrtd) / a;
             if (!ray_t.surrounds(root)) {
-                return false;
+                return std::nullopt;
             }
         }
 
-        rec.t = root;
-        rec.p = r.at(rec.t);
-        vec3 outward_normal = (rec.p - center) / radius;
-        rec.set_face_normal(r, outward_normal);
-        rec.mat_ptr = mat_ptr;
+        point3 hit_point = r.at(root);
+        vec3 outward_normal = (hit_point - center) / radius;
 
-        return true;
+        return tiny::make_optional<hit_record>(hit_point, root, mat_ptr, r, outward_normal);
     }
 
 private:
