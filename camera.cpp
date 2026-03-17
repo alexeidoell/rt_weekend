@@ -23,7 +23,7 @@ void camera::render(const hittable& world) {
             for (int t = 0; t < threads; t++) {
                 result[j * image_width + i] += thread_buffers[t][j * image_width + i];
             }
-            result[j * image_width + i] *= pixel_samples_scale;
+            result[j * image_width + i] /= threads;
             write_color(std::cout, result[j * image_width + i]);
         }
     }
