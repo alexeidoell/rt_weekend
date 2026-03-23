@@ -51,13 +51,12 @@ private:
 
     vec3 defocus_disk_u, defocus_disk_v;
 
-    static const int thread_count = 4;
+    static const int thread_count = 16;
     std::array<std::thread, thread_count> render_threads;
-    std::array<std::vector<color3>, thread_count> thread_buffers;
     std::vector<color3> result;
 
     void initialize();
-    void thread_render(color3* buffer, const hittable& world, const int thread_num);
+    void thread_render(const hittable& world, const int thread_num);
     color3 ray_color(const ray& r, const hittable& world, int depth) const;
     ray get_ray(int i, int j) const;
     vec3 sample_square() const;

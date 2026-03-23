@@ -8,7 +8,7 @@ void camera::render(const hittable& world) {
     decltype(this) camera_ptr = this;
 
     for (int i = 0; i < thread_count; i++) {
-        render_threads[i] = std::thread(&camera::thread_render, camera_ptr, &result[i * result.size() / thread_count], std::cref(world), i);
+        render_threads[i] = std::thread(&camera::thread_render, camera_ptr, std::cref(world), i);
     }
 
     for (auto& thread : render_threads) {
@@ -29,6 +29,12 @@ void camera::render(const hittable& world) {
 void camera::initialize() {
 
     image_height = calculate_height(image_width, aspect_ratio);
+    
+    if ((image_height * image_width) % thread_count != 0) {
+        std::cerr << "Error: image dimensions must be divisible by thread count" << std::endl;
+        exit(-1);
+    }
+
     viewport_height = calculate_viewport_height();
     viewport_width = viewport_height * (double(image_width) / image_height);
     camera_center = lookfrom;
@@ -52,18 +58,18 @@ void camera::initialize() {
     result.resize(image_width * image_height);
 }
 
-void camera::thread_render(color3* buffer, const hittable& world, const int thread_num) {
+void camera::thread_render(const hittable& world, const int thread_num) {
     ssize_t start_pixel = thread_num * result.size() / thread_count;
     ssize_t pixel_count = result.size() / this->thread_count;
-    for (int p = 0; p < pixel_count; p++) {
-        int i = (p + start_pixel) % image_width;
-        int j = (p + start_pixel) / image_width;
+    for (int p = start_pixel; p < start_pixel + pixel_count; p++) {
+        int i = (p % image_width);
+        int j = (p / image_width);
         color3 pixel_color(0,0,0);
         for (int sample = 0; sample < samples_per_pixel; sample++) {
             ray r = get_ray(i, j);
             pixel_color += ray_color(r, world, 0);
         }
-        buffer[p] = pixel_samples_scale * pixel_color;
+        result[p] = pixel_samples_scale * pixel_color;
     }
 
 
