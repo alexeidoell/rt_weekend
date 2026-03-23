@@ -18,6 +18,7 @@ inline void write_color(std::ostream& out, const color3& pixel_color) {
     auto g = linear_to_gamma(pixel_color.y());
     auto b = linear_to_gamma(pixel_color.z());
 
+
     static const interval intensity(0.000, 0.999);
 
     // Translate the [0,1] component values to the byte range [0,255].

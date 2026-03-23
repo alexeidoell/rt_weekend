@@ -8,7 +8,7 @@ void camera::render(const hittable& world) {
     decltype(this) camera_ptr = this;
 
     for (int i = 0; i < thread_count; i++) {
-        render_threads[i] = std::thread(&camera::thread_render, camera_ptr, std::ref(thread_buffers[i]), std::cref(world));
+        render_threads[i] = std::thread(&camera::thread_render, camera_ptr, &result[i * result.size() / thread_count], std::cref(world), i);
     }
 
     for (auto& thread : render_threads) {
@@ -19,11 +19,6 @@ void camera::render(const hittable& world) {
 
     for (int j = 0; j < image_height; j++) {
         for (int i = 0; i < image_width; i++) {
-            result[j * image_width + i] = color3(0,0,0);
-            for (int t = 0; t < thread_count; t++) {
-                result[j * image_width + i] += thread_buffers[t][j * image_width + i];
-            }
-            result[j * image_width + i] *= (1.0 / thread_count);
             write_color(std::cout, result[j * image_width + i]);
         }
     }
@@ -54,20 +49,21 @@ void camera::initialize() {
     defocus_disk_u = defocus_radius * u;
     defocus_disk_v = defocus_radius * v;
 
-    result.reserve(image_width * image_height);
+    result.resize(image_width * image_height);
 }
 
-void camera::thread_render(std::vector<color3>& buffer, const hittable& world) {
-    buffer.reserve(image_width * image_height);
-    for (int j = 0; j < image_height; j++) {
-        for (int i = 0; i < image_width; i++) {
-            color3 pixel_color(0,0,0);
-            for (int sample = 0; sample < samples_per_pixel; sample++) {
-                ray r = get_ray(i, j);
-                pixel_color += ray_color(r, world, 0);
-            }
-            buffer[j * image_width + i] = pixel_samples_scale * pixel_color;
+void camera::thread_render(color3* buffer, const hittable& world, const int thread_num) {
+    ssize_t start_pixel = thread_num * result.size() / thread_count;
+    ssize_t pixel_count = result.size() / this->thread_count;
+    for (int p = 0; p < pixel_count; p++) {
+        int i = (p + start_pixel) % image_width;
+        int j = (p + start_pixel) / image_width;
+        color3 pixel_color(0,0,0);
+        for (int sample = 0; sample < samples_per_pixel; sample++) {
+            ray r = get_ray(i, j);
+            pixel_color += ray_color(r, world, 0);
         }
+        buffer[p] = pixel_samples_scale * pixel_color;
     }
 
 
