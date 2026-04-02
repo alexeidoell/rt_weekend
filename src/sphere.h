@@ -2,7 +2,6 @@
 #include <tiny/optional.h>
 #include "hittable.h"
 #include "vec3.h"
-#include <memory>
 
 class sphere : public hittable {
 public:

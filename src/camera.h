@@ -22,6 +22,7 @@ public:
     int vfov = 20;
     float defocus_angle = 0.6;
     float focus_dist = 10.0;
+    color3 background_color = color3(0,0,0);
 
     point3 lookfrom = point3(13,2,3);
     point3 lookat = point3(0,0,0);

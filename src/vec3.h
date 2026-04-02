@@ -3,14 +3,12 @@
 #include "common.h"
 #include <cstddef>
 #include <iostream>
-#include <hwy/highway.h>
 
 class vec3 {
 public:
     float e[3];
     vec3();
     vec3(float e0, float e1, float e2);
-    vec3(hwy::N_SSE2::Vec128<float> vec);
 
 
     float x() const;
@@ -31,8 +29,6 @@ public:
 
     static vec3 random();
     static vec3 random(float min, float max);
-
-    hwy::N_SSE2::Vec128<float> vec;
 };
 
 using point3 = vec3;

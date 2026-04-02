@@ -1,4 +1,5 @@
 #include "hittable.h"
+#include "vec3.h"
 #include "camera.h"
 
 void camera::render(const hittable& world) {
@@ -81,18 +82,16 @@ color3 camera::ray_color(const ray& r, const hittable& world, int depth) const {
         return color3(0,0,0);
     }
     auto rec = world.hit(r, interval(0.001, infinity));
-    if (rec) {
-        auto scatter_result = rec->mat_ptr->scatter(r, *rec);
-        color3 emitted = rec->mat_ptr->emitted();
-        if (scatter_result) {
-            return emitted + scatter_result->first * ray_color(scatter_result->second, world, depth + 1);
-        }
+    if (!rec) {
+        return background_color;
+    }
+    auto scatter_result = rec->mat_ptr->scatter(r, *rec);
+    color3 emitted = rec->mat_ptr->emitted();
+    if (!scatter_result) {
         return emitted;
     }
+    return scatter_result->first * ray_color(scatter_result->second, world, depth + 1) + emitted;
 
-    vec3 unit_vec = unit_vector(r.direction());
-    float a = 0.5 * (unit_vec.y() + 1.0);
-    return (1.0 - a) * color3(1.0, 1.0, 1.0) + a * color3(0.5, 0.7, 1.0);
 }
 
 ray camera::get_ray(int i, int j) const {

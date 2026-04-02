@@ -4,7 +4,7 @@
 #include "interval.h"
 #include "vec3.h"
 #include <memory>
-#include <optional>
+#include <vector>
 #include <tiny/optional.h>
 
 class material;
