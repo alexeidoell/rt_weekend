@@ -6,10 +6,10 @@
 
 class sphere : public hittable {
 public:
-    sphere(const point3& center, double radius, std::shared_ptr<material> mat_ptr) : center(center), radius(std::fmax(0,radius)), mat_ptr(mat_ptr) {}
+    sphere(const point3& center, float radius, std::shared_ptr<material> mat_ptr) : center(center), radius(std::fmax(0,radius)), mat_ptr(mat_ptr) {}
     tiny::optional<hit_record> hit(const ray& r, interval ray_t) const override;
 private:
     point3 center;
-    double radius;
+    float radius;
     std::shared_ptr<material> mat_ptr;
 };

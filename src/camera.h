@@ -8,20 +8,20 @@
 #include "vec3.h"
 #include "material.h"
 
-inline constexpr double calculate_height(double image_width, double aspect_ratio) {
-    double image_height = static_cast<int>(image_width / aspect_ratio);
+inline constexpr float calculate_height(float image_width, float aspect_ratio) {
+    float image_height = static_cast<int>(image_width / aspect_ratio);
     return image_height < 1 ? 1 : image_height;
 }
 
 class camera {
 public:
-    double aspect_ratio = 16.0 / 9.0;
+    float aspect_ratio = 16.0 / 9.0;
     int image_width = 1200;
     int samples_per_pixel = 5;
     int max_depth = 50;
     int vfov = 20;
-    double defocus_angle = 0.6;
-    double focus_dist = 10.0;
+    float defocus_angle = 0.6;
+    float focus_dist = 10.0;
 
     point3 lookfrom = point3(13,2,3);
     point3 lookat = point3(0,0,0);
@@ -32,18 +32,18 @@ public:
 
 
 private:
-    constexpr double calculate_viewport_height() {
-        double theta = degrees_to_radians(vfov);
-        double h = std::tan(theta/2);
+    constexpr float calculate_viewport_height() {
+        float theta = degrees_to_radians(vfov);
+        float h = std::tan(theta/2);
         return 2 * h * focus_dist;
 
     }
 
     int image_height;
-    double viewport_height;
-    double viewport_width;
+    float viewport_height;
+    float viewport_width;
     point3 camera_center;
-    double pixel_samples_scale;
+    float pixel_samples_scale;
 
     vec3 pixel_delta_u, pixel_delta_v;
     point3 pixel00_loc;

@@ -13,11 +13,11 @@ class hit_record {
 public:
     point3 p;
     vec3 normal;
-    double t;
+    float t;
     bool front_face;
     std::shared_ptr<material> mat_ptr;
 
-    hit_record(const point3 p, const double t, const std::shared_ptr<material> mat_ptr, const ray& hit_ray, const vec3& outward_normal) : p(p), t(t), mat_ptr(mat_ptr) { 
+    hit_record(const point3 p, const float t, const std::shared_ptr<material> mat_ptr, const ray& hit_ray, const vec3& outward_normal) : p(p), t(t), mat_ptr(mat_ptr) { 
         set_face_normal(hit_ray, outward_normal);
     }
 

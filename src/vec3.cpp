@@ -48,7 +48,7 @@ float vec3::length() const {
 
 bool vec3::near_zero() const {
     auto s = 1e-8;
-    hwy::N_SSE2::CappedTag<float, 4> d;
+    const hwy::N_SSE2::CappedTag<float, 4> d;
     auto comp = hwy::N_SSE2::Set(d, s);
     auto result = hwy::N_SSE2::Lt(vec, comp);
     return hwy::N_SSE2::AllTrue(d, result);
@@ -100,7 +100,7 @@ float dot(const vec3& u, const vec3& v) {
 }
 
 vec3 cross(const vec3& u, const vec3& v) {
-    hwy::N_SSE2::CappedTag<float, 4> d;
+    const hwy::N_SSE2::CappedTag<float, 4> d;
     auto u_shuffled = hwy::N_SSE2::Per4LaneBlockShuffle<1, 0, 2, 1>(u.vec);
     auto v_shuffled = hwy::N_SSE2::Per4LaneBlockShuffle<1, 0, 2, 1>(v.vec);
 
@@ -122,12 +122,17 @@ vec3 random_in_unit_disk() {
     }
 }
 
+// marsaglia formula
+// only needs 2 random numbers
 vec3 random_unit_vector() {
     while (true) {
-        auto p = vec3::random(-1,1);
-        auto lensq = p.length_squared();
-        if (1e-160 < lensq && lensq <= 1)
-            return p / std::sqrt(lensq);
+        float x1 = random_double(-1, 1);
+        float x2 = random_double(-1, 1);
+        float test = x1*x1 + x2*x2;
+        if (1e-160 < test && test <= 1) {
+            float sqrt_term = std::sqrt(1 - test);
+            return vec3(2*x1*sqrt_term, 2*x2*sqrt_term, 1 - 2*test);
+        }
     }
 }
 

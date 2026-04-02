@@ -1,4 +1,5 @@
 #include "sphere.h"
+#include "vec3.h"
 
 tiny::optional<hit_record> sphere::hit(const ray& r, interval ray_t) const {
     vec3 oc = center - r.origin();

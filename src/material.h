@@ -33,23 +33,23 @@ private:
 
 class metal : public material {
   public:
-    metal(const color3& albedo, double fuzz) : albedo(albedo), fuzz(fuzz < 1 ? fuzz : 1) {}
+    metal(const color3& albedo, float fuzz) : albedo(albedo), fuzz(fuzz < 1 ? fuzz : 1) {}
 
     tiny::optional<std::pair<color3, ray>> scatter(const ray& r_in, const hit_record& rec) const override;
   private:
     color3 albedo;
-    double fuzz;
+    float fuzz;
 };
 
 class dielectric : public material {
 public:
-    dielectric(double refraction_index) : refraction_index(refraction_index) {}
+    dielectric(float refraction_index) : refraction_index(refraction_index) {}
 
     tiny::optional<std::pair<color3, ray>> scatter(const ray& r_in, const hit_record& rec) const override;
 private:
-    double refraction_index;
+    float refraction_index;
 
-    constexpr static double reflectance(double cosine, double ri) {
+    constexpr static float reflectance(float cosine, float ri) {
         auto r0 = (1-ri) / (1+ri);
         r0 = r0*r0;
         return r0 + (1-r0) * std::pow((1 - cosine), 5);

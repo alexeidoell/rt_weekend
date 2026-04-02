@@ -87,9 +87,9 @@ void quads() {
 
     camera cam;
 
-    cam.aspect_ratio      = 1.0;
-    cam.image_width       = 400;
-    cam.samples_per_pixel = 5;
+    cam.aspect_ratio      = 16.0 / 9;
+    cam.image_width       = 1920;
+    cam.samples_per_pixel = 50;
     cam.max_depth         = 50;
 
     cam.vfov     = 80;
@@ -103,6 +103,6 @@ void quads() {
 }
 
 int main() {
-    bouncing_spheres();
-    //quads();
+    //bouncing_spheres();
+    quads();
 }

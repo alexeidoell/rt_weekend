@@ -7,14 +7,13 @@ void camera::render(const hittable& world) {
 
     decltype(this) camera_ptr = this;
 
-    for (int i = 1; i < thread_count; i++) {
+    for (int i = 0; i < thread_count; i++) {
         render_threads[i] = std::thread(&camera::thread_render, camera_ptr, std::cref(world), i);
     }
 
-    this->thread_render(world, 0);
 
-    for (auto thread = render_threads.begin() + 1; thread != render_threads.end(); ++thread) {      
-        thread->join();
+    for (auto& thread : render_threads) {
+        thread.join();
     }
 
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
@@ -38,7 +37,7 @@ void camera::initialize() {
     }
 
     viewport_height = calculate_viewport_height();
-    viewport_width = viewport_height * (double(image_width) / image_height);
+    viewport_width = viewport_height * (float(image_width) / image_height);
     camera_center = lookfrom;
     pixel_samples_scale = 1.0 / samples_per_pixel;
     w = unit_vector(lookfrom - lookat);
@@ -53,7 +52,7 @@ void camera::initialize() {
 
     point3 viewport_upper_left = camera_center - (focus_dist * w) - viewport_u/2 - viewport_v/2;
     pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
-    double defocus_radius = std::tan(degrees_to_radians(defocus_angle)) * focus_dist;
+    float defocus_radius = std::tan(degrees_to_radians(defocus_angle)) * focus_dist;
     defocus_disk_u = defocus_radius * u;
     defocus_disk_v = defocus_radius * v;
 
@@ -92,7 +91,7 @@ color3 camera::ray_color(const ray& r, const hittable& world, int depth) const {
     }
 
     vec3 unit_vec = unit_vector(r.direction());
-    double a = 0.5 * (unit_vec.y() + 1.0);
+    float a = 0.5 * (unit_vec.y() + 1.0);
     return (1.0 - a) * color3(1.0, 1.0, 1.0) + a * color3(0.5, 0.7, 1.0);
 }
 
