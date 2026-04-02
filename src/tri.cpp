@@ -3,7 +3,7 @@
 #include <tiny/optional.h>
 #include "tri.h"
 
-tiny::optional<hit_record> tri::hit(const ray& r, interval ray_t) const {
+tiny::optional<hit_record> tri::hit(const ray& r, interval ray_t) const noexcept {
     float denominator = dot(normal, r.direction());
     if (std::fabs(denominator) < 1e-8) { // parallel to plane
         return std::nullopt;
@@ -38,7 +38,7 @@ point3 tri::barycentric_coords(const point3& point) const {
     return point3(u_coord, v_coord, w_coord);
 }
 
-tiny::optional<hit_record> quad::hit(const ray& r, interval ray_t) const {
+tiny::optional<hit_record> quad::hit(const ray& r, interval ray_t) const noexcept {
     auto hit1 = t1.hit(r, ray_t);
     if (hit1) {
         return hit1;

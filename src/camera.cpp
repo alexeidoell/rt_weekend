@@ -1,5 +1,6 @@
 #include "hittable.h"
 #include "vec3.h"
+#include <cstring>
 #include "camera.h"
 
 void camera::render(const hittable& world) {
@@ -63,16 +64,18 @@ void camera::initialize() {
 void camera::thread_render(const hittable& world, const int thread_num) {
     ssize_t start_pixel = thread_num * result.size() / thread_count;
     ssize_t pixel_count = result.size() / this->thread_count;
-    for (int p = start_pixel; p < start_pixel + pixel_count; p++) {
-        int i = (p % image_width);
-        int j = (p / image_width);
+    color3* buffer = new color3[pixel_count];
+    for (int p = 0; p < pixel_count; p++) {
+        int i = ((p + start_pixel) % image_width);
+        int j = ((p + start_pixel) / image_width);
         color3 pixel_color(0,0,0);
         for (int sample = 0; sample < samples_per_pixel; sample++) {
             ray r = get_ray(i, j);
             pixel_color += ray_color(r, world, 0);
         }
-        result[p] = pixel_samples_scale * pixel_color;
+        buffer[p] = pixel_samples_scale * pixel_color;
     }
+    memcpy(&result[start_pixel], buffer, pixel_count * sizeof(color3));
 
 
 }

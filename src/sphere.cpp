@@ -1,7 +1,7 @@
 #include "sphere.h"
 #include "vec3.h"
 
-tiny::optional<hit_record> sphere::hit(const ray& r, interval ray_t) const {
+tiny::optional<hit_record> sphere::hit(const ray& r, interval ray_t) const noexcept {
     vec3 oc = center - r.origin();
     float a = r.direction().length_squared();
     float h = dot(r.direction(), oc);

@@ -18,12 +18,12 @@ add_executable(rt_weekend
 
 )
 
-target_compile_features(rt_weekend PUBLIC cxx_std_20)
+target_compile_features(rt_weekend PUBLIC cxx_std_23)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 find_package(hwy REQUIRED)
 find_package(tiny-optional REQUIRED)
-target_compile_options(rt_weekend PRIVATE -march=native -mfma)
+target_compile_options(rt_weekend PRIVATE -march=native -mfma -fno-exceptions)
 target_link_libraries(rt_weekend PRIVATE tiny-optional::tiny-optional Threads::Threads)
 
