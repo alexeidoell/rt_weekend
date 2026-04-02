@@ -51,7 +51,7 @@ private:
 
     vec3 defocus_disk_u, defocus_disk_v;
 
-    static const int thread_count = 16;
+    static const int thread_count = 12;
     std::array<std::thread, thread_count> render_threads;
     std::vector<color3> result;
 

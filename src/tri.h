@@ -3,7 +3,7 @@
 #include "hittable.h"
 #include "vec3.h"
 #include <memory>
-#include "../tiny-optional/include/tiny/optional.h"
+#include <tiny/optional.h>
 
 class tri : public hittable {
 public:

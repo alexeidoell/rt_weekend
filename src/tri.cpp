@@ -34,10 +34,10 @@ point3 tri::barycentric_coords(const point3& point) const {
     double d20 = dot(anchor_to_point, u);
     double d21 = dot(anchor_to_point, v);
 
-    float denominator = d00 * d11 - d01 * d01;
-    float v_coord = (d11 * d20 - d01 * d21) / denominator;
-    float w_coord = (d00 * d21 - d01 * d20) / denominator;
-    float u_coord = 1.0 - v_coord - w_coord;
+    double denominator = d00 * d11 - d01 * d01;
+    double v_coord = (d11 * d20 - d01 * d21) / denominator;
+    double w_coord = (d00 * d21 - d01 * d20) / denominator;
+    double u_coord = 1.0 - v_coord - w_coord;
 
     return point3(u_coord, v_coord, w_coord);
 }

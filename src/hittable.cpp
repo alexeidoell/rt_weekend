@@ -1,5 +1,5 @@
 #include "hittable.h"
-#include "../tiny-optional/include/tiny/optional.h"
+#include <tiny/optional.h>
 
 void hit_record::set_face_normal(const ray& r, const vec3& outward_normal) {
     // outward_normal must be a unit vector

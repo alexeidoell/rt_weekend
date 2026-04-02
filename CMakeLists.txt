@@ -9,17 +9,20 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
 add_executable(rt_weekend
     src/main.cpp
+    src/vec3.cpp
     src/camera.cpp
     src/sphere.cpp
     src/tri.cpp
     src/material.cpp
     src/hittable.cpp
+    src/vectorization.cpp
 )
 
 target_compile_features(rt_weekend PUBLIC cxx_std_20)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-target_link_libraries(rt_weekend PRIVATE Threads::Threads)
-add_subdirectory(tiny-optional)
-target_link_libraries(rt_weekend PRIVATE tiny-optional::tiny-optional)
+find_package(hwy REQUIRED)
+find_package(tiny-optional REQUIRED)
+target_link_libraries(rt_weekend PRIVATE tiny-optional::tiny-optional Threads::Threads hwy::hwy)
+

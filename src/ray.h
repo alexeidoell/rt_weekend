@@ -2,6 +2,7 @@
 
 
 #include "vec3.h"
+#include "vectorization.h"
 
 class ray {
 public:
@@ -13,7 +14,7 @@ public:
     const vec3& direction() const { return dir; }
 
     vec3 at(double t) const {
-        return orig + t * dir;
+        return N_SSE2::point_at(orig.vec, dir.vec, t);
     }
 
 private:

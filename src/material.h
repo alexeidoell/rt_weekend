@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "../tiny-optional/include/tiny/optional.h"
+#include <tiny/optional.h>
 #include <utility>
 #include "common.h"
 #include "color3.h"

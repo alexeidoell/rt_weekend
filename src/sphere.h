@@ -1,10 +1,8 @@
 #pragma once
-
-
+#include <tiny/optional.h>
 #include "hittable.h"
 #include "vec3.h"
 #include <memory>
-#include "../tiny-optional/include/tiny/optional.h"
 
 class sphere : public hittable {
 public:

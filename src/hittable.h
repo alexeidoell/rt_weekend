@@ -5,7 +5,7 @@
 #include "vec3.h"
 #include <memory>
 #include <optional>
-#include "../tiny-optional/include/tiny/optional.h"
+#include <tiny/optional.h>
 
 class material;
 

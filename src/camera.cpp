@@ -7,12 +7,14 @@ void camera::render(const hittable& world) {
 
     decltype(this) camera_ptr = this;
 
-    for (int i = 0; i < thread_count; i++) {
+    for (int i = 1; i < thread_count; i++) {
         render_threads[i] = std::thread(&camera::thread_render, camera_ptr, std::cref(world), i);
     }
 
-    for (auto& thread : render_threads) {
-        thread.join();
+    this->thread_render(world, 0);
+
+    for (auto thread = render_threads.begin() + 1; thread != render_threads.end(); ++thread) {      
+        thread->join();
     }
 
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";

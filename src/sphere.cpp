@@ -2,19 +2,19 @@
 
 tiny::optional<hit_record> sphere::hit(const ray& r, interval ray_t) const {
     vec3 oc = center - r.origin();
-    auto a = r.direction().length_squared();
-    auto h = dot(r.direction(), oc);
-    auto c = oc.length_squared() - radius*radius;
+    float a = r.direction().length_squared();
+    float h = dot(r.direction(), oc);
+    float c = oc.length_squared() - radius*radius;
 
 
-    auto discriminant = h*h - a*c;
+    float discriminant = h*h - a*c;
     if (discriminant < 0)
         return std::nullopt;
 
-    auto sqrtd = std::sqrt(discriminant);
+    float sqrtd = std::sqrt(discriminant);
 
     // Find the nearest root that lies in the acceptable range.
-    auto root = (h - sqrtd) / a;
+    float root = (h - sqrtd) / a;
     if (!ray_t.surrounds(root)) {
         root = (h + sqrtd) / a;
         if (!ray_t.surrounds(root)) {
