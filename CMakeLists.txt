@@ -15,15 +15,15 @@ add_executable(rt_weekend
     src/tri.cpp
     src/material.cpp
     src/hittable.cpp
-
+    src/vectorization.cpp
 )
 
 target_compile_features(rt_weekend PUBLIC cxx_std_23)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-find_package(hwy REQUIRED)
+find_package(highway REQUIRED)
 find_package(tiny-optional REQUIRED)
 target_compile_options(rt_weekend PRIVATE -march=native -mfma -fno-exceptions)
-target_link_libraries(rt_weekend PRIVATE tiny-optional::tiny-optional Threads::Threads)
+target_link_libraries(rt_weekend PRIVATE tiny-optional::tiny-optional Threads::Threads highway::highway)
 

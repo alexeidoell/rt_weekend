@@ -1,4 +1,5 @@
 [requires]
+highway/1.3.0
 tiny-optional/1.5.2
 
 [generators]

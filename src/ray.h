@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vec3.h"
+#include "vectorization.h"
 
 class ray {
 public:
@@ -12,7 +13,7 @@ public:
     const vec3& direction() const { return dir; }
 
     vec3 at(float t) const {
-        return orig + t * dir;
+        return HWY_STATIC_NAMESPACE::point_at(orig.vec, dir.vec, t);
     }
 
 private:

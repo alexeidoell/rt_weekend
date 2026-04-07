@@ -93,7 +93,7 @@ color3 camera::ray_color(const ray& r, const hittable& world, int depth) const {
     if (!scatter_result) {
         return emitted;
     }
-    return scatter_result->first * ray_color(scatter_result->second, world, depth + 1) + emitted;
+    return color3(hwy::HWY_STATIC_NAMESPACE::MulAdd(scatter_result->first.vec, ray_color(scatter_result->second, world, depth + 1).vec, emitted.vec));
 
 }
 

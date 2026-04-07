@@ -7,14 +7,17 @@
 class tri : public hittable {
 public:
     tri(const point3& p1, const point3& p2, const point3& p3, std::shared_ptr<const material> mat_ptr) noexcept : anchor(p1), p2(p2), p3(p3), mat_ptr(mat_ptr) {
+        const hwy::HWY_STATIC_NAMESPACE::CappedTag<float, 4> d;
         u = p2 - anchor;
         v = p3 - anchor;
         normal = unit_vector(cross(u, v));
         d00 = dot(u, u);
         d01 = dot(u, v);
         d11 = dot(v, v);
+        float top_arr[4] = {d11, -d01, d00, -d01};
+        top = hwy::HWY_STATIC_NAMESPACE::Load(d, top_arr);
         denominator = d00 * d11 - d01 * d01;
-
+        denom_v = Set(d, denominator);
         D = dot(normal, anchor);
     }
     tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept override;
@@ -25,6 +28,8 @@ private:
     float D;
     float d00, d01, d11, denominator;
     std::shared_ptr<const material> mat_ptr;
+    hwy::HWY_STATIC_NAMESPACE::Vec128<float> top;
+    hwy::HWY_STATIC_NAMESPACE::Vec128<float> denom_v;
 
     point3 barycentric_coords(const point3& point) const;
 };

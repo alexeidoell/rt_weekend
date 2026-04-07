@@ -7,7 +7,6 @@ tiny::optional<hit_record> sphere::hit(const ray& r, interval ray_t) const noexc
     float h = dot(r.direction(), oc);
     float c = oc.length_squared() - radius*radius;
 
-
     float discriminant = h*h - a*c;
     if (discriminant < 0)
         return std::nullopt;

@@ -138,7 +138,7 @@ void cornell_box() {
 }
 
 int main() {
-    //bouncing_spheres();
-    quads();
+    bouncing_spheres();
+    //quads();
     //cornell_box();
 }
