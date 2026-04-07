@@ -4,14 +4,17 @@
 
 class hittable_list : public hittable {
 public:
-    using variant_type = std::variant<const sphere, const tri, const quad>;
-    std::vector<variant_type> objects;
+    std::vector<sphere> spheres;
+    std::vector<tri>    tris;
+    std::vector<quad>   quads;
 
     hittable_list() noexcept {}
 
-    void clear(); 
+    void clear() { spheres.clear(); tris.clear(); quads.clear(); }
 
-    void add(const variant_type &&object) noexcept;
+    void add(sphere s) noexcept { spheres.push_back(std::move(s)); }
+    void add(tri t)    noexcept { tris.push_back(std::move(t)); }
+    void add(quad q)   noexcept { quads.push_back(std::move(q)); }
 
     tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept override;
 };

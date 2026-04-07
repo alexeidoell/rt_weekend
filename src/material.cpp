@@ -1,6 +1,6 @@
 #include "material.h"
 
-tiny::optional<std::pair<color3, ray>> lambertian::scatter(const ray& r_in, const hit_record& rec) const {
+tiny::optional<ray> lambertian::scatter(const ray& r_in, const hit_record& rec) const {
     float random = random_double(0, 1);
     if (random < -0.3) {
         return std::nullopt;
@@ -10,19 +10,19 @@ tiny::optional<std::pair<color3, ray>> lambertian::scatter(const ray& r_in, cons
     if (scatter_direction.near_zero())
         scatter_direction = rec.normal;
 
-    return tiny::make_optional<std::pair<color3,ray>>(albedo, ray(rec.p, scatter_direction));
+    return tiny::make_optional<ray>(rec.p, scatter_direction);
 }
 
-tiny::optional<std::pair<color3, ray>> metal::scatter(const ray& r_in, const hit_record& rec) const {
+tiny::optional<ray> metal::scatter(const ray& r_in, const hit_record& rec) const {
     vec3 reflected = reflect(r_in.direction(), rec.normal);
     reflected = unit_vector(reflected) + fuzz * random_unit_vector();
     if (dot(reflected, rec.normal) > 0) {
-        return tiny::make_optional<std::pair<color3,ray>>(albedo, ray(rec.p, reflected));
+        return tiny::make_optional<ray>(rec.p, reflected);
     }
     return std::nullopt;
 }
 
-tiny::optional<std::pair<color3, ray>> dielectric::scatter(const ray& r_in, const hit_record& rec) const {
+tiny::optional<ray> dielectric::scatter(const ray& r_in, const hit_record& rec) const {
     float ri = rec.front_face ? (1.0/refraction_index) : refraction_index;
 
     vec3 unit_direction = unit_vector(r_in.direction());
@@ -36,10 +36,10 @@ tiny::optional<std::pair<color3, ray>> dielectric::scatter(const ray& r_in, cons
         direction = refract(unit_direction, rec.normal, ri);
 
     }
-    return tiny::make_optional<std::pair<color3,ray>>(color3(1.0,1.0,1.0), ray(rec.p, direction));
+    return tiny::make_optional<ray>(rec.p, direction);
 }
 
-tiny::optional<std::pair<color3, ray>> diffuse_light::scatter(const ray& r_in, const hit_record& rec) const {
+tiny::optional<ray> diffuse_light::scatter(const ray& r_in, const hit_record& rec) const {
     return std::nullopt;
 }
 

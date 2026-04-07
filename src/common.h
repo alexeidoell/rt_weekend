@@ -1,6 +1,7 @@
 #pragma once
 
 #include <random>
+#include "pcg_random.hpp"
 
 // Constants
 
@@ -14,8 +15,9 @@ inline constexpr float degrees_to_radians(float degrees) {
 }
 
 inline float random_double() {
+    static pcg_extras::seed_seq_from<std::random_device> seed_source;
     static std::uniform_real_distribution<float> distribution(0.0, 1.0);
-    static std::mt19937 generator;
+    static pcg32 generator(seed_source);
     return distribution(generator);
 }
 

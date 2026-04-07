@@ -99,12 +99,16 @@ float dot(const vec3& u, const vec3& v) {
     return HWY_STATIC_NAMESPACE::dot_packed(u.vec, v.vec);
 }
 
-vec3 cross(const vec3& u, const vec3& v) {
+hwy::HWY_STATIC_NAMESPACE::Vec128<float> cross_vector_only(const hwy::HWY_STATIC_NAMESPACE::Vec128<float> u, const hwy::HWY_STATIC_NAMESPACE::Vec128<float> v) {
     const hwy::HWY_STATIC_NAMESPACE::CappedTag<float, 4> d;
-    auto u_shuffled = hwy::HWY_STATIC_NAMESPACE::Per4LaneBlockShuffle<1, 0, 2, 1>(u.vec);
-    auto v_shuffled = hwy::HWY_STATIC_NAMESPACE::Per4LaneBlockShuffle<1, 0, 2, 1>(v.vec);
+    auto u_shuffled = hwy::HWY_STATIC_NAMESPACE::Per4LaneBlockShuffle<1, 0, 2, 1>(u);
+    auto v_shuffled = hwy::HWY_STATIC_NAMESPACE::Per4LaneBlockShuffle<1, 0, 2, 1>(v);
     auto right = Mul(hwy::HWY_STATIC_NAMESPACE::SlideDownLanes(d, u_shuffled, 1), v_shuffled);
-    return vec3(MulSub(u_shuffled, hwy::HWY_STATIC_NAMESPACE::SlideDownLanes(d, v_shuffled, 1), right));
+    return MulSub(u_shuffled, hwy::HWY_STATIC_NAMESPACE::SlideDownLanes(d, v_shuffled, 1), right);
+}
+
+vec3 cross(const vec3& u, const vec3& v) {
+    return vec3(cross_vector_only(u.vec, v.vec));
 }
 
 vec3 unit_vector(const vec3& v) {

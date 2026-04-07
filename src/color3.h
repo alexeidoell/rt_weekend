@@ -13,6 +13,12 @@ inline float linear_to_gamma(float linear_component) {
     return 0;
 }
 
+#pragma optimize("", off)
+inline void do_nothing(int rbyte, int gbyte, int bbyte) {
+    // do nothing
+}
+#pragma optimize("", on)
+
 inline void write_color(std::ostream& out, const color3& pixel_color) {
     auto r = linear_to_gamma(pixel_color.x());
     auto g = linear_to_gamma(pixel_color.y());
@@ -28,5 +34,5 @@ inline void write_color(std::ostream& out, const color3& pixel_color) {
 
     // Write out the pixel color components.
     out << rbyte << ' ' << gbyte << ' ' << bbyte << '\n';
+    //do_nothing(rbyte, gbyte, bbyte);
 }
-

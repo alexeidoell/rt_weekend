@@ -4,40 +4,29 @@
 #include "vec3.h"
 #include <tiny/optional.h>
 
-class tri : public hittable {
+class tri {
 public:
-    tri(const point3& p1, const point3& p2, const point3& p3, std::shared_ptr<const material> mat_ptr) noexcept : anchor(p1), p2(p2), p3(p3), mat_ptr(mat_ptr) {
-        const hwy::HWY_STATIC_NAMESPACE::CappedTag<float, 4> d;
-        u = p2 - anchor;
-        v = p3 - anchor;
-        normal = unit_vector(cross(u, v));
-        d00 = dot(u, u);
-        d01 = dot(u, v);
-        d11 = dot(v, v);
-        float top_arr[4] = {d11, -d01, d00, -d01};
-        top = hwy::HWY_STATIC_NAMESPACE::Load(d, top_arr);
-        denominator = d00 * d11 - d01 * d01;
-        denom_v = Set(d, denominator);
-        D = dot(normal, anchor);
+    tri(const point3& p1, const point3& p2, const point3& p3, std::shared_ptr<const material> mat_ptr) noexcept {
+        vec3 u_vec = p2 - p1;
+        vec3 v_vec = p3 - p1;
+        vec3 n = unit_vector(cross(u_vec, v_vec));
+        anchor = p1.vec;
+        u_e = u_vec.vec;
+        v_e = v_vec.vec;
+        this->mat_ptr = mat_ptr;
     }
-    tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept override;
+    tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept;
 private:
-    point3 anchor, p2, p3;
-    vec3 u, v;
-    vec3 normal;
-    float D;
-    float d00, d01, d11, denominator;
+    hwy::N_AVX2::Vec128<float> anchor;
+    hwy::N_AVX2::Vec128<float> u_e;
+    hwy::N_AVX2::Vec128<float> v_e;
     std::shared_ptr<const material> mat_ptr;
-    hwy::HWY_STATIC_NAMESPACE::Vec128<float> top;
-    hwy::HWY_STATIC_NAMESPACE::Vec128<float> denom_v;
-
-    point3 barycentric_coords(const point3& point) const;
 };
 
-class quad : public hittable {
+class quad {
 public:
     quad(const point3& p1, const vec3& u, const vec3& v, std::shared_ptr<const material> mat_ptr) noexcept : t1(p1, p1 + u, p1 + v, mat_ptr), t2(p1 + u + v, p1 + u, p1 + v, mat_ptr) {}
-    tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept override;
+    tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept;
 private:
     tri t1, t2;
 };

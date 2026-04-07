@@ -1,3 +1,4 @@
+#include "color3.h"
 #include "hittable.h"
 #include "vec3.h"
 #include <cstring>
@@ -9,10 +10,12 @@ void camera::render(const hittable& world) {
 
     decltype(this) camera_ptr = this;
 
-    for (int i = 0; i < thread_count; i++) {
-        render_threads[i] = std::thread(&camera::thread_render, camera_ptr, std::cref(world), i);
+    for (int i = 0; i < thread_count - 1; i++) {
+        render_threads[i] = std::thread(&camera::thread_render<false>, camera_ptr, std::cref(world));
     }
 
+    thread_render<true>(world);
+     
 
     for (auto& thread : render_threads) {
         thread.join();
@@ -33,11 +36,6 @@ void camera::initialize() {
 
     image_height = calculate_height(image_width, aspect_ratio);
     
-    if ((image_height * image_width) % thread_count != 0) {
-        std::cerr << "Error: image dimensions must be divisible by thread count" << std::endl;
-        exit(-1);
-    }
-
     viewport_height = calculate_viewport_height();
     viewport_width = viewport_height * (float(image_width) / image_height);
     camera_center = lookfrom;
@@ -59,24 +57,40 @@ void camera::initialize() {
     defocus_disk_v = defocus_radius * v;
 
     result.resize(image_width * image_height);
+
+    for (int i = 0; i < image_height * image_width; i += pixel_count) {
+        render_tasks.push(i);
+    }
+
+
 }
 
-void camera::thread_render(const hittable& world, const int thread_num) {
-    ssize_t start_pixel = thread_num * result.size() / thread_count;
-    ssize_t pixel_count = result.size() / this->thread_count;
+template <bool owner>
+void camera::thread_render(const hittable& world) {
     color3* buffer = new color3[pixel_count];
-    for (int p = 0; p < pixel_count; p++) {
-        int i = ((p + start_pixel) % image_width);
-        int j = ((p + start_pixel) / image_width);
-        color3 pixel_color(0,0,0);
-        for (int sample = 0; sample < samples_per_pixel; sample++) {
-            ray r = get_ray(i, j);
-            pixel_color += ray_color(r, world, 0);
+    while (!render_tasks.empty()) {
+        std::optional<int> task;
+        if constexpr (owner) {
+            task = render_tasks.pop();
+        } else {
+            task = render_tasks.steal();
         }
-        buffer[p] = pixel_samples_scale * pixel_color;
+        if (!task) {
+            continue;
+        }
+        ssize_t start_pixel = *task;
+        for (int p = 0; p < pixel_count; p++) {
+            int i = ((p + start_pixel) % image_width);
+            int j = ((p + start_pixel) / image_width);
+            color3 pixel_color(0,0,0);
+            for (int sample = 0; sample < samples_per_pixel; sample++) {
+                ray r = get_ray(i, j);
+                pixel_color += ray_color(r, world, 0);
+            }
+            buffer[p] = pixel_samples_scale * pixel_color;
+        }
+        memcpy(&result[start_pixel], buffer, pixel_count * sizeof(color3));
     }
-    memcpy(&result[start_pixel], buffer, pixel_count * sizeof(color3));
-
 
 }
 
@@ -93,7 +107,7 @@ color3 camera::ray_color(const ray& r, const hittable& world, int depth) const {
     if (!scatter_result) {
         return emitted;
     }
-    return color3(hwy::HWY_STATIC_NAMESPACE::MulAdd(scatter_result->first.vec, ray_color(scatter_result->second, world, depth + 1).vec, emitted.vec));
+    return color3(hwy::HWY_STATIC_NAMESPACE::MulAdd(rec->mat_ptr->get_albedo().vec, ray_color(*scatter_result, world, depth + 1).vec, emitted.vec));
 
 }
 

@@ -4,7 +4,6 @@
 #include "interval.h"
 #include "vec3.h"
 #include <memory>
-#include <variant>
 #include <vector>
 #include <tiny/optional.h>
 
@@ -21,7 +20,6 @@ public:
     hit_record(const point3 p, const float t, const std::shared_ptr<const material> mat_ptr, const ray& hit_ray, const vec3& outward_normal) : p(p), t(t), mat_ptr(mat_ptr) { 
         set_face_normal(hit_ray, outward_normal);
     }
-
 
     void set_face_normal(const ray& r, const vec3& outward_normal);
 };

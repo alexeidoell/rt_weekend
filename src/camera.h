@@ -6,6 +6,7 @@
 #include "color3.h"
 #include "hittable.h"
 #include "vec3.h"
+#include "taskflow/core/wsq.hpp"
 #include "material.h"
 
 inline constexpr float calculate_height(float image_width, float aspect_ratio) {
@@ -31,6 +32,9 @@ public:
 
     void render(const hittable& world);
 
+    tf::UnboundedWSQ<int> render_tasks;
+    constexpr static size_t pixel_count = 50;
+
 
 private:
     constexpr float calculate_viewport_height() {
@@ -53,15 +57,20 @@ private:
     vec3 defocus_disk_u, defocus_disk_v;
 
     static const int thread_count = 12;
-    std::array<std::thread, thread_count> render_threads;
+    std::array<std::thread, thread_count - 1> render_threads;
     std::vector<color3> result;
 
     void initialize();
-    void thread_render(const hittable& world, const int thread_num);
+
+    template <bool owner>
+    void thread_render(const hittable& world);
+
     color3 ray_color(const ray& r, const hittable& world, int depth) const;
     ray get_ray(int i, int j) const;
     vec3 sample_square() const;
     vec3 defocus_disk_sample() const;
+
+
 
 };
 

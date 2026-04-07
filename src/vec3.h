@@ -45,6 +45,7 @@ vec3 operator*(const vec3& v, float t);
 vec3 operator/(const vec3& v, float t);
 float dot(const vec3& u, const vec3& v);
 vec3 cross(const vec3& u, const vec3& v);
+hwy::HWY_STATIC_NAMESPACE::Vec128<float> cross_vector_only(const hwy::HWY_STATIC_NAMESPACE::Vec128<float> u, const hwy::HWY_STATIC_NAMESPACE::Vec128<float> v);
 vec3 unit_vector(const vec3& v);
 vec3 random_in_unit_disk();
 vec3 random_unit_vector();

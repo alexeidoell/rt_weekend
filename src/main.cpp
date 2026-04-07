@@ -13,7 +13,7 @@ void bouncing_spheres() {
     hittable_list world;
 
     auto ground_material = std::make_shared<const lambertian>(color3(0.5, 0.5, 0.5));
-    world.add(hittable_list::variant_type(sphere(point3(0,-1000,0), 1000, ground_material)));
+    world.add(sphere(point3(0,-1000,0), 1000, ground_material));
     for (int a = -11; a < 11; a++) {
         for (int b = -11; b < 11; b++) {
             auto choose_mat = random_double();
@@ -25,30 +25,30 @@ void bouncing_spheres() {
                     // diffuse
                     auto albedo = color3::random() * color3::random();
                     sphere_material = std::make_shared<const lambertian>(albedo);
-                    world.add(hittable_list::variant_type(sphere(center, 0.2, sphere_material)));
+                    world.add(sphere(center, 0.2, sphere_material));
                 } else if (choose_mat < 0.95) {
                     // metal
                     auto albedo = color3::random(0.5, 1);
                     auto fuzz = random_double(0, 0.5);
                     sphere_material = std::make_shared<const metal>(albedo, fuzz);
-                    world.add(hittable_list::variant_type(sphere(center, 0.2, sphere_material)));
+                    world.add(sphere(center, 0.2, sphere_material));
                 } else {
                     // glass
                     sphere_material = std::make_shared<const dielectric>(1.5);
-                    world.add(hittable_list::variant_type(sphere(center, 0.2, sphere_material)));
+                    world.add(sphere(center, 0.2, sphere_material));
                 }
             }
         }
     }
 
     auto material1 = std::make_shared<const dielectric>(1.5);
-    world.add(hittable_list::variant_type(sphere(point3(0, 1, 0), 1.0, material1)));
+    world.add(sphere(point3(0, 1, 0), 1.0, material1));
 
     auto material2 = std::make_shared<const lambertian>(color3(0.4, 0.2, 0.1));
-    world.add(hittable_list::variant_type(sphere(point3(-4, 1, 0), 1.0, material2)));
+    world.add(sphere(point3(-4, 1, 0), 1.0, material2));
 
     auto material3 = std::make_shared<const metal>(color3(0.7, 0.6, 0.5), 0.0);
-    world.add(hittable_list::variant_type(sphere(point3(4, 1, 0), 1.0, material3)));
+    world.add(sphere(point3(4, 1, 0), 1.0, material3));
 
     camera cam;
 
@@ -80,11 +80,11 @@ void quads() {
     auto lower_teal   = std::make_shared<const lambertian>(color3(0.2, 0.8, 0.8));
 
     // Quads
-    world.add(hittable_list::variant_type(quad(point3(-3,-2, 5), vec3(0, 0,-4), vec3(0, 4, 0), left_red)));
-    world.add(hittable_list::variant_type(quad(point3(-2,-2, 0), vec3(4, 0, 0), vec3(0, 4, 0), back_green)));
-    world.add(hittable_list::variant_type(quad(point3( 3,-2, 1), vec3(0, 0, 4), vec3(0, 4, 0), right_blue)));
-    world.add(hittable_list::variant_type(quad(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4), upper_orange)));
-    world.add(hittable_list::variant_type(quad(point3(-2,-3, 5), vec3(4, 0, 0), vec3(0, 0,-4), lower_teal)));
+    world.add(quad(point3(-3,-2, 5), vec3(0, 0,-4), vec3(0, 4, 0), left_red));
+    world.add(quad(point3(-2,-2, 0), vec3(4, 0, 0), vec3(0, 4, 0), back_green));
+    world.add(quad(point3( 3,-2, 1), vec3(0, 0, 4), vec3(0, 4, 0), right_blue));
+    world.add(quad(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4), upper_orange));
+    world.add(quad(point3(-2,-3, 5), vec3(4, 0, 0), vec3(0, 0,-4), lower_teal));
 
     camera cam;
 
@@ -112,12 +112,12 @@ void cornell_box() {
     auto green = std::make_shared<const lambertian>(color3(.12, .45, .15));
     auto light = std::make_shared<const diffuse_light>(color3(15, 15, 15));
 
-    world.add(hittable_list::variant_type(quad(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green)));
-    world.add(hittable_list::variant_type(quad(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red)));
-    world.add(hittable_list::variant_type(quad(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light)));
-    world.add(hittable_list::variant_type(quad(point3(0,0,0), vec3(555,0,0), vec3(0,0,555), white)));
-    world.add(hittable_list::variant_type(quad(point3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), white)));
-    world.add(hittable_list::variant_type(quad(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white)));
+    world.add(quad(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green));
+    world.add(quad(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red));
+    world.add(quad(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light));
+    world.add(quad(point3(0,0,0), vec3(555,0,0), vec3(0,0,555), white));
+    world.add(quad(point3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), white));
+    world.add(quad(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white));
 
     camera cam;
 
@@ -138,7 +138,7 @@ void cornell_box() {
 }
 
 int main() {
-    bouncing_spheres();
-    //quads();
+    //bouncing_spheres();
+    quads();
     //cornell_box();
 }
