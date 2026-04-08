@@ -17,8 +17,8 @@ public:
     float z() const;
 
     vec3 operator-() const;
-    float& operator[](std::size_t i);
-    const float& operator[](std::size_t i) const;
+    float operator[](std::size_t i);
+    const float operator[](std::size_t i) const;
 
     vec3& operator+=(const vec3& v);
     vec3& operator*=(float t);

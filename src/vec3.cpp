@@ -20,8 +20,8 @@ float vec3::y() const { return vec.raw[1]; }
 float vec3::z() const { return vec.raw[2]; }
 
 vec3 vec3::operator-() const { return vec3(hn::Neg(vec)); }
-float& vec3::operator[](std::size_t i) { return vec.raw[i]; }
-const float& vec3::operator[](std::size_t i) const { return vec.raw[i]; }
+float vec3::operator[](std::size_t i) { return vec.raw[i]; }
+const float vec3::operator[](std::size_t i) const { return vec.raw[i]; }
 
 vec3& vec3::operator+=(const vec3& v) {
     vec = hn::Add(vec, v.vec);

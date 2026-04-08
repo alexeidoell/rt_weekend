@@ -1,5 +1,6 @@
 #pragma once
 
+#include "aabb.h"
 #include "ray.h"
 #include "interval.h"
 #include "vec3.h"
@@ -26,4 +27,5 @@ class hittable {
 public:
     virtual ~hittable() = default;
     virtual tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept = 0;
+    virtual aabb bounding_box() const = 0;
 };

@@ -3,14 +3,28 @@
 #include <memory>
 #include "hittable.h"
 #include "vec3.h"
+#include "aabb.h"
 
 class sphere {
 public:
-    sphere(const point3& center, float radius, std::shared_ptr<const material> mat_ptr) noexcept : center(center, vec3(0,0,0)), radius(std::fmax(0,radius)), mat_ptr(mat_ptr) {}
-    sphere(const point3& center1, const point3& center2, float radius, std::shared_ptr<const material> mat_ptr) noexcept : center(center1, center2 - center1), radius(std::fmax(0,radius)), mat_ptr(mat_ptr) {}
+    sphere(const point3& center, float radius, std::shared_ptr<const material> mat_ptr) noexcept : center(center, vec3(0,0,0)), radius(std::fmax(0,radius)), mat_ptr(mat_ptr) {
+        vec3 radius_vec = vec3(radius, radius, radius);
+        bbox = aabb(center - radius_vec, center + radius_vec);
+    }
+    sphere(const point3& center1, const point3& center2, float radius, std::shared_ptr<const material> mat_ptr) noexcept : center(center1, center2 - center1), radius(std::fmax(0,radius)), mat_ptr(mat_ptr) {
+        vec3 radius_vec = vec3(radius, radius, radius);
+        aabb bbox0 = aabb(center1 - radius_vec, center1 + radius_vec);
+        aabb bbox1 = aabb(center2 - radius_vec, center2 + radius_vec);
+        bbox = aabb(bbox0, bbox1);
+
+    }
     tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept;
+    const aabb& bounding_box() const {
+        return bbox;
+    }
 private:
     ray center;
     float radius;
     std::shared_ptr<const material> mat_ptr;
+    aabb bbox;
 };

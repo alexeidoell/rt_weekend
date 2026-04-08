@@ -1,5 +1,6 @@
 #pragma once
 
+#include "aabb.h"
 #include "hittable.h"
 #include "vec3.h"
 #include <memory>
@@ -17,17 +18,27 @@ public:
         this->mat_ptr = mat_ptr;
     }
     tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept;
+    const aabb& bounding_box() const {
+        return bbox;
+    }
 private:
     hn::Vec128<float> anchor;
     hn::Vec128<float> u_e;
     hn::Vec128<float> v_e;
     std::shared_ptr<const material> mat_ptr;
+    aabb bbox;
 };
 
 class quad {
 public:
-    quad(const point3& p1, const vec3& u, const vec3& v, std::shared_ptr<const material> mat_ptr) noexcept : t1(p1, p1 + u, p1 + v, mat_ptr), t2(p1 + u + v, p1 + u, p1 + v, mat_ptr) {}
+    quad(const point3& p1, const vec3& u, const vec3& v, std::shared_ptr<const material> mat_ptr) noexcept : t1(p1, p1 + u, p1 + v, mat_ptr), t2(p1 + u + v, p1 + u, p1 + v, mat_ptr) {
+        bbox = aabb(t1.bounding_box(), t2.bounding_box());
+    }
+    const aabb& bounding_box() const {
+        return bbox;
+    }
     tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept;
 private:
     tri t1, t2;
+    aabb bbox;
 };

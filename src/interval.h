@@ -3,7 +3,7 @@
 #include "common.h"
 class interval {
 public:
-    const float min, max;
+    float min, max;
 
     constexpr interval() : min(-infinity), max(infinity) {}
     constexpr interval(float min, float max) : min(min), max(max) {}
@@ -20,6 +20,11 @@ public:
     interval expand(float delta) const {
         delta = delta/2;
         return interval(min - delta, max + delta);
+    }
+
+    interval(const interval& a, const interval& b) {
+        min = a.min < b.min ? a.min : b.min;
+        max = a.max > b.max ? a.max : b.max;
     }
 };
 

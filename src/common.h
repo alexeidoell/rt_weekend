@@ -27,3 +27,8 @@ inline float random_double() {
 inline float random_double(float min, float max) {
     return min + (max - min) * random_double();
 }
+
+inline int random_int(int min, int max) {
+    return static_cast<int>(random_double(min, max + 1));
+}
+
