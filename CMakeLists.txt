@@ -26,6 +26,7 @@ find_package(highway REQUIRED)
 find_package(tiny-optional REQUIRED)
 find_package(Taskflow REQUIRED)
 find_package(pcg-cpp REQUIRED)
+find_package(SPNG REQUIRED)
 target_compile_options(rt_weekend PRIVATE -march=native -mfma -fno-exceptions)
-target_link_libraries(rt_weekend PRIVATE tiny-optional::tiny-optional Threads::Threads highway::highway Taskflow::Taskflow pcg-cpp::pcg-cpp)
+target_link_libraries(rt_weekend PRIVATE tiny-optional::tiny-optional Threads::Threads highway::highway Taskflow::Taskflow pcg-cpp::pcg-cpp spng::spng_static)
 

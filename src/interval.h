@@ -16,6 +16,11 @@ public:
         if (x > max) return max;
         return x;
     }
+
+    interval expand(float delta) const {
+        delta = delta/2;
+        return interval(min - delta, max + delta);
+    }
 };
 
 constexpr interval empty = interval(infinity, -infinity);

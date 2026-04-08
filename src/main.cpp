@@ -25,7 +25,8 @@ void bouncing_spheres() {
                     // diffuse
                     auto albedo = color3::random() * color3::random();
                     sphere_material = std::make_shared<const lambertian>(albedo);
-                    world.add(sphere(center, 0.2, sphere_material));
+                    auto center2 = center + vec3(0, random_double(0, 0.5), 0);
+                    world.add(sphere(center, center2, 0.2, sphere_material));
                 } else if (choose_mat < 0.95) {
                     // metal
                     auto albedo = color3::random(0.5, 1);
@@ -54,7 +55,7 @@ void bouncing_spheres() {
 
     cam.aspect_ratio      = 16.0 / 9.0;
     cam.image_width       = 400;
-    cam.samples_per_pixel = 50;
+    cam.samples_per_pixel = 100;
     cam.max_depth         = 50;
 
     cam.vfov     = 20;
@@ -121,9 +122,9 @@ void cornell_box() {
 
     camera cam;
 
-    cam.aspect_ratio      = 1.0;
+    cam.aspect_ratio      = 16.0 / 9;
     cam.image_width       = 600;
-    cam.samples_per_pixel = 200;
+    cam.samples_per_pixel = 500;
     cam.max_depth         = 50;
 
     cam.vfov     = 40;
@@ -138,7 +139,7 @@ void cornell_box() {
 }
 
 int main() {
-    //bouncing_spheres();
-    quads();
+    bouncing_spheres();
+    //quads();
     //cornell_box();
 }

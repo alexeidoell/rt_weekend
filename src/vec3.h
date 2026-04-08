@@ -5,12 +5,12 @@
 #include <iostream>
 #include <hwy/highway.h>
 
+// ???
 class vec3 {
 public:
-    float e[3];
     vec3();
     vec3(float e0, float e1, float e2);
-    vec3(hwy::HWY_STATIC_NAMESPACE::Vec128<float> vec);
+    vec3(hn::Vec128<float> vec);
 
     float x() const;
     float y() const;
@@ -31,7 +31,7 @@ public:
     static vec3 random();
     static vec3 random(float min, float max);
 
-    hwy::HWY_STATIC_NAMESPACE::Vec128<float> vec;
+    hn::Vec128<float> vec;
 };
 
 using point3 = vec3;
@@ -45,7 +45,7 @@ vec3 operator*(const vec3& v, float t);
 vec3 operator/(const vec3& v, float t);
 float dot(const vec3& u, const vec3& v);
 vec3 cross(const vec3& u, const vec3& v);
-hwy::HWY_STATIC_NAMESPACE::Vec128<float> cross_vector_only(const hwy::HWY_STATIC_NAMESPACE::Vec128<float> u, const hwy::HWY_STATIC_NAMESPACE::Vec128<float> v);
+hn::Vec128<float> cross_vector_only(const hn::Vec128<float> u, const hn::Vec128<float> v);
 vec3 unit_vector(const vec3& v);
 vec3 random_in_unit_disk();
 vec3 random_unit_vector();

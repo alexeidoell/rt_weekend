@@ -12,7 +12,7 @@ class material {
 public:
     virtual ~material() = default;
 
-    virtual color3 get_albedo() const {
+    inline virtual color3 get_albedo() const {
         return color3(0,0,0);
     };
 
@@ -29,7 +29,7 @@ class lambertian : public material {
 public:
     lambertian(const color3& albedo) : albedo(albedo) {}
     tiny::optional<ray> scatter(const ray& r_in, const hit_record& rec) const override;
-    color3 get_albedo() const override {
+    inline color3 get_albedo() const override {
         return albedo;
     }
 private:
@@ -43,7 +43,7 @@ class metal : public material {
     metal(const color3& albedo, float fuzz) : albedo(albedo), fuzz(fuzz < 1 ? fuzz : 1) {}
 
     tiny::optional<ray> scatter(const ray& r_in, const hit_record& rec) const override;
-    color3 get_albedo() const override {
+    inline color3 get_albedo() const override {
         return albedo;
     }
   private:
@@ -56,7 +56,7 @@ public:
     dielectric(float refraction_index) : refraction_index(refraction_index) {}
 
     tiny::optional<ray> scatter(const ray& r_in, const hit_record& rec) const override;
-    color3 get_albedo() const override {
+    inline color3 get_albedo() const override {
         return color3(1,1,1);
     }
 private:

@@ -2,6 +2,7 @@
 
 #include "hittable.h"
 #include "vec3.h"
+#include <memory>
 #include <tiny/optional.h>
 
 class tri {
@@ -17,9 +18,9 @@ public:
     }
     tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept;
 private:
-    hwy::N_AVX2::Vec128<float> anchor;
-    hwy::N_AVX2::Vec128<float> u_e;
-    hwy::N_AVX2::Vec128<float> v_e;
+    hn::Vec128<float> anchor;
+    hn::Vec128<float> u_e;
+    hn::Vec128<float> v_e;
     std::shared_ptr<const material> mat_ptr;
 };
 

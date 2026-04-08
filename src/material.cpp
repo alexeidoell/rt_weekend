@@ -10,14 +10,14 @@ tiny::optional<ray> lambertian::scatter(const ray& r_in, const hit_record& rec) 
     if (scatter_direction.near_zero())
         scatter_direction = rec.normal;
 
-    return tiny::make_optional<ray>(rec.p, scatter_direction);
+    return tiny::make_optional<ray>(rec.p, scatter_direction, r_in.time());
 }
 
 tiny::optional<ray> metal::scatter(const ray& r_in, const hit_record& rec) const {
     vec3 reflected = reflect(r_in.direction(), rec.normal);
     reflected = unit_vector(reflected) + fuzz * random_unit_vector();
     if (dot(reflected, rec.normal) > 0) {
-        return tiny::make_optional<ray>(rec.p, reflected);
+        return tiny::make_optional<ray>(rec.p, reflected, r_in.time());
     }
     return std::nullopt;
 }
@@ -36,7 +36,7 @@ tiny::optional<ray> dielectric::scatter(const ray& r_in, const hit_record& rec) 
         direction = refract(unit_direction, rec.normal, ri);
 
     }
-    return tiny::make_optional<ray>(rec.p, direction);
+    return tiny::make_optional<ray>(rec.p, direction, r_in.time());
 }
 
 tiny::optional<ray> diffuse_light::scatter(const ray& r_in, const hit_record& rec) const {

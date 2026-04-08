@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <thread>
 #include <array>
 #include <vector>
@@ -33,7 +34,7 @@ public:
     void render(const hittable& world);
 
     tf::UnboundedWSQ<int> render_tasks;
-    constexpr static size_t pixel_count = 50;
+    constexpr static size_t pixel_count = 64;
 
 
 private:
@@ -58,7 +59,6 @@ private:
 
     static const int thread_count = 12;
     std::array<std::thread, thread_count - 1> render_threads;
-    std::vector<color3> result;
 
     void initialize();
 
@@ -69,6 +69,8 @@ private:
     ray get_ray(int i, int j) const;
     vec3 sample_square() const;
     vec3 defocus_disk_sample() const;
+
+    std::unique_ptr<uint8_t[]> result;
 
 
 

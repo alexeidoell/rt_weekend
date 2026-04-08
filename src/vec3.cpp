@@ -3,35 +3,33 @@
 #include <immintrin.h>
 #include <cmath>
 
-vec3::vec3() : e{0, 0, 0} {
-    vec = hwy::HWY_STATIC_NAMESPACE::Set(hwy::HWY_STATIC_NAMESPACE::CappedTag<float, 4>(), 0.f);
+vec3::vec3() {
+    vec = hn::Set(hn::CappedTag<float, 4>(), 0.f);
 }
 
-vec3::vec3(float e0, float e1, float e2) : e{e0, e1, e2} {
-    vec = hwy::HWY_STATIC_NAMESPACE::LoadN(hwy::HWY_STATIC_NAMESPACE::CappedTag<float, 4>(), e, 3);
+vec3::vec3(float e0, float e1, float e2) {
+    float arr[4] = {e0, e1, e2, 0.f};
+    vec = hn::LoadN(hn::CappedTag<float, 4>(), arr, 3);
 }
 
-vec3::vec3(hwy::HWY_STATIC_NAMESPACE::Vec128<float> vec) : vec(vec) {
-    hwy::HWY_STATIC_NAMESPACE::StoreN(vec, hwy::HWY_STATIC_NAMESPACE::CappedTag<float, 4>(), e, 3);
+vec3::vec3(hn::Vec128<float> vec) : vec(vec) {
 }
 
-float vec3::x() const { return e[0]; }
-float vec3::y() const { return e[1]; }
-float vec3::z() const { return e[2]; }
+float vec3::x() const { return vec.raw[0]; }
+float vec3::y() const { return vec.raw[1]; }
+float vec3::z() const { return vec.raw[2]; }
 
-vec3 vec3::operator-() const { return vec3(-e[0], -e[1], -e[2]); }
-float& vec3::operator[](std::size_t i) { return e[i]; }
-const float& vec3::operator[](std::size_t i) const { return e[i]; }
+vec3 vec3::operator-() const { return vec3(hn::Neg(vec)); }
+float& vec3::operator[](std::size_t i) { return vec.raw[i]; }
+const float& vec3::operator[](std::size_t i) const { return vec.raw[i]; }
 
 vec3& vec3::operator+=(const vec3& v) {
-    vec = hwy::HWY_STATIC_NAMESPACE::Add(vec, v.vec);
-    hwy::HWY_STATIC_NAMESPACE::StoreN(vec, hwy::HWY_STATIC_NAMESPACE::CappedTag<float, 4>(), e, 3);
+    vec = hn::Add(vec, v.vec);
     return *this;
 }
 
 vec3& vec3::operator*=(float t) {
-    vec = hwy::HWY_STATIC_NAMESPACE::Mul(vec, hwy::HWY_STATIC_NAMESPACE::Set(hwy::HWY_STATIC_NAMESPACE::CappedTag<float, 4>(), t));
-    hwy::HWY_STATIC_NAMESPACE::StoreN(vec, hwy::HWY_STATIC_NAMESPACE::CappedTag<float, 4>(), e, 3);
+    vec = hn::Mul(vec, hn::Set(hn::CappedTag<float, 4>(), t));
     return *this;
 }
 
@@ -44,15 +42,15 @@ float vec3::length() const {
 }
 
 float vec3::length_squared() const {
-    return HWY_STATIC_NAMESPACE::dot_packed(vec, vec);
+    return dot_packed(vec, vec);
 }
 
 bool vec3::near_zero() const {
     const float s = 1e-8f;
-    const hwy::HWY_STATIC_NAMESPACE::CappedTag<float, 4> d;
-    auto comp = hwy::HWY_STATIC_NAMESPACE::Set(d, s);
-    auto result = hwy::HWY_STATIC_NAMESPACE::Lt(vec, comp);
-    return hwy::HWY_STATIC_NAMESPACE::AllTrue(d, result);
+    const hn::CappedTag<float, 4> d;
+    auto comp = hn::Set(d, s);
+    auto result = hn::Lt(vec, comp);
+    return hn::AllTrue(d, result);
 }
 
 vec3 vec3::random() {
@@ -64,23 +62,23 @@ vec3 vec3::random(float min, float max) {
 }
 
 std::ostream& operator<<(std::ostream& out, const vec3& v) {
-    return out << v.e[0] << ' ' << v.e[1] << ' ' << v.e[2];
+    return out << v[0] << ' ' << v[1] << ' ' << v[2];
 }
 
 vec3 operator+(const vec3& u, const vec3& v) {
-    return vec3(hwy::HWY_STATIC_NAMESPACE::Add(u.vec, v.vec));
+    return vec3(hn::Add(u.vec, v.vec));
 }
 
 vec3 operator-(const vec3& u, const vec3& v) {
-    return vec3(hwy::HWY_STATIC_NAMESPACE::Sub(u.vec, v.vec));
+    return vec3(hn::Sub(u.vec, v.vec));
 }
 
 vec3 operator*(const vec3& u, const vec3& v) {
-    return vec3(hwy::HWY_STATIC_NAMESPACE::Mul(u.vec, v.vec));
+    return vec3(hn::Mul(u.vec, v.vec));
 }
 
 vec3 operator*(float t, const vec3& v) {
-    return vec3(hwy::HWY_STATIC_NAMESPACE::Mul(hwy::HWY_STATIC_NAMESPACE::Set(hwy::HWY_STATIC_NAMESPACE::CappedTag<float, 4>(), t), v.vec));
+    return vec3(hn::Mul(hn::Set(hn::CappedTag<float, 4>(), t), v.vec));
 }
 
 vec3 operator*(const vec3& v, float t) {
@@ -92,19 +90,19 @@ vec3 operator/(const vec3& v, float t) {
 }
 
 bool operator==(const vec3& u, const vec3& v) {
-    return hwy::HWY_STATIC_NAMESPACE::AllTrue(hwy::HWY_STATIC_NAMESPACE::CappedTag<float, 4>(), hwy::HWY_STATIC_NAMESPACE::Eq(u.vec, v.vec));
+    return hn::AllTrue(hn::CappedTag<float, 4>(), hn::Eq(u.vec, v.vec));
 }
 
 float dot(const vec3& u, const vec3& v) {
-    return HWY_STATIC_NAMESPACE::dot_packed(u.vec, v.vec);
+    return dot_packed(u.vec, v.vec);
 }
 
-hwy::HWY_STATIC_NAMESPACE::Vec128<float> cross_vector_only(const hwy::HWY_STATIC_NAMESPACE::Vec128<float> u, const hwy::HWY_STATIC_NAMESPACE::Vec128<float> v) {
-    const hwy::HWY_STATIC_NAMESPACE::CappedTag<float, 4> d;
-    auto u_shuffled = hwy::HWY_STATIC_NAMESPACE::Per4LaneBlockShuffle<1, 0, 2, 1>(u);
-    auto v_shuffled = hwy::HWY_STATIC_NAMESPACE::Per4LaneBlockShuffle<1, 0, 2, 1>(v);
-    auto right = Mul(hwy::HWY_STATIC_NAMESPACE::SlideDownLanes(d, u_shuffled, 1), v_shuffled);
-    return MulSub(u_shuffled, hwy::HWY_STATIC_NAMESPACE::SlideDownLanes(d, v_shuffled, 1), right);
+hn::Vec128<float> cross_vector_only(const hn::Vec128<float> u, const hn::Vec128<float> v) {
+    const hn::CappedTag<float, 4> d;
+    auto u_shuffled = hn::Per4LaneBlockShuffle<1, 0, 2, 1>(u);
+    auto v_shuffled = hn::Per4LaneBlockShuffle<1, 0, 2, 1>(v);
+    auto right = Mul(hn::SlideDownLanes(d, u_shuffled, 1), v_shuffled);
+    return MulSub(u_shuffled, hn::SlideDownLanes(d, v_shuffled, 1), right);
 }
 
 vec3 cross(const vec3& u, const vec3& v) {
@@ -155,4 +153,3 @@ vec3 refract(const vec3& uv, const vec3& n, float etai_over_etap) {
     vec3 r_out_parallel = -std::sqrt(std::fabs(1.0 - r_out_perp.length_squared())) * n;
     return r_out_perp + r_out_parallel;
 }
-

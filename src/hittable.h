@@ -3,8 +3,6 @@
 #include "ray.h"
 #include "interval.h"
 #include "vec3.h"
-#include <memory>
-#include <vector>
 #include <tiny/optional.h>
 
 class material;
@@ -15,9 +13,9 @@ public:
     vec3 normal;
     float t;
     bool front_face;
-    std::shared_ptr<const material> mat_ptr;
+    const material* mat_ptr; // cannot be a reference because it deletes the copy constructor of optional<hit_record>
 
-    hit_record(const point3 p, const float t, const std::shared_ptr<const material> mat_ptr, const ray& hit_ray, const vec3& outward_normal) : p(p), t(t), mat_ptr(mat_ptr) { 
+    hit_record(const point3 p, const float t, const material* mat_ptr, const ray& hit_ray, const vec3& outward_normal) : p(p), t(t), mat_ptr(mat_ptr) { 
         set_face_normal(hit_ray, outward_normal);
     }
 
