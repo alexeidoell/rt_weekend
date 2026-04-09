@@ -67,6 +67,8 @@ void bouncing_spheres() {
     cam.focus_dist    = 10.0;
     cam.background_color = color3(0.70, 0.80, 1.00);
 
+    //bvh_node bvh(world);
+
     cam.render(world);
 }
 
@@ -101,6 +103,8 @@ void quads() {
     cam.background_color = color3(0.70, 0.80, 1.00);
 
     cam.defocus_angle = 0;
+
+//    bvh_node bvh(world);
 
     cam.render(world);
 }
@@ -139,7 +143,7 @@ void cornell_box() {
 }
 
 int main() {
-    bouncing_spheres();
-    //quads();
+    //bouncing_spheres();
+    quads();
     //cornell_box();
 }

@@ -29,7 +29,7 @@ public:
     template <class Hittable>
     void add(Hittable s) noexcept { 
         objects.push_back(std::move(s));
-        bbox = aabb(bbox, objects.back().visit([](auto&& obj) { return obj.bounding_box(); }));
+        bbox = aabb(bbox, std::visit([&](auto&& obj) { return obj.bounding_box(); }, objects.back()));
     }
 
     aabb bounding_box() const override { return bbox; }
@@ -42,15 +42,14 @@ private:
 
 class bvh_node : public hittable {
 public:
-    bvh_node(hittable_list list) : bvh_node(list, 0, list.objects.size()) {
+    bvh_node(hittable_list list) : bvh_node(list.objects, 0, list.objects.size()) {
         // There's a C++ subtlety here. This constructor (without span indices) creates an
         // implicit copy of the hittable list, which we will modify. The lifetime of the copied
         // list only extends until this constructor exits. That's OK, because we only need to
         // persist the resulting bounding volume hierarchy.
     }
 
-    bvh_node(hittable_list obj_list, size_t start, size_t end) {
-        auto objects = obj_list.objects;
+    bvh_node(std::vector<hittable_types> objects, size_t start, size_t end) {
         int axis = random_int(0,2);
 
         auto comparator = (axis == 0) ? box_x_compare
@@ -68,15 +67,15 @@ public:
             std::sort(std::begin(objects) + start, std::begin(objects) + end, comparator);
 
             auto mid = start + object_span/2;
-            left = std::make_shared<bvh_node>(obj_list, start, mid);
-            right = std::make_shared<bvh_node>(obj_list, mid, end);
+            left = std::make_shared<bvh_node>(objects, start, mid);
+            right = std::make_shared<bvh_node>(objects, mid, end);
         }
 
         bbox = aabb(left->bounding_box(), right->bounding_box());
 
     }
 
-    tiny::optional<hit_record> hit(const ray& r, interval ray_t) const override {
+    tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept override {
         if (!bbox.hit(r, ray_t))
             return std::nullopt;
 
@@ -100,22 +99,24 @@ public:
     aabb bbox;
 
         static bool box_compare(
-        const std::shared_ptr<hittable> a, const std::shared_ptr<hittable> b, int axis_index
+                const hittable_types& a, const hittable_types& b, int axis_index
     ) {
-        auto a_axis_interval = a->bounding_box().axis_interval(axis_index);
-        auto b_axis_interval = b->bounding_box().axis_interval(axis_index);
+            aabb a_bbox = std::visit([&](auto&& obj) { return obj.bounding_box(); }, a);
+            aabb b_bbox = std::visit([&](auto&& obj) { return obj.bounding_box(); }, b);
+        auto a_axis_interval = a_bbox.axis_interval(axis_index);
+        auto b_axis_interval = b_bbox.axis_interval(axis_index);
         return a_axis_interval.min < b_axis_interval.min;
     }
 
-    static bool box_x_compare (const std::shared_ptr<hittable> a, const std::shared_ptr<hittable> b) {
+    static bool box_x_compare (const hittable_types& a, const hittable_types& b) {
         return box_compare(a, b, 0);
     }
 
-    static bool box_y_compare (const std::shared_ptr<hittable> a, const std::shared_ptr<hittable> b) {
+    static bool box_y_compare (const hittable_types& a, const hittable_types& b) {
         return box_compare(a, b, 1);
     }
 
-    static bool box_z_compare (const std::shared_ptr<hittable> a, const std::shared_ptr<hittable> b) {
+    static bool box_z_compare (const hittable_types& a, const hittable_types& b) {
         return box_compare(a, b, 2);
     }
 
