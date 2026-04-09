@@ -57,7 +57,7 @@ private:
 
     vec3 defocus_disk_u, defocus_disk_v;
 
-    static const int thread_count = 16;
+    static const int thread_count = 12;
     std::array<std::thread, thread_count - 1> render_threads;
 
     void initialize();

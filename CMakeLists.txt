@@ -6,7 +6,6 @@ project(rt_weekend VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/..)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-add_compile_definitions(HWY_WANT_AVX3_ZEN4)
 
 add_executable(rt_weekend
     src/main.cpp

@@ -7,13 +7,15 @@
 #include "hittable_list.h"
 #include "common.h"
 #include "sphere.h"
+#include <memory>
+#include <print>
 
 void bouncing_spheres() {
 
     hittable_list world;
 
     auto ground_material = std::make_shared<const lambertian>(color3(0.5, 0.5, 0.5));
-    world.add(sphere(point3(0,-1000,0), 1000, ground_material));
+    world.add<sphere>(point3(0,-1000,0), 1000, ground_material);
     for (int a = -11; a < 11; a++) {
         for (int b = -11; b < 11; b++) {
             auto choose_mat = random_double();
@@ -26,30 +28,30 @@ void bouncing_spheres() {
                     auto albedo = color3::random() * color3::random();
                     sphere_material = std::make_shared<const lambertian>(albedo);
                     auto center2 = center + vec3(0, random_double(0, 0.5), 0);
-                    world.add(sphere(center, center2, 0.2, sphere_material));
+                    world.add<sphere>(center, center2, 0.2, sphere_material);
                 } else if (choose_mat < 0.95) {
                     // metal
                     auto albedo = color3::random(0.5, 1);
                     auto fuzz = random_double(0, 0.5);
                     sphere_material = std::make_shared<const metal>(albedo, fuzz);
-                    world.add(sphere(center, 0.2, sphere_material));
+                    world.add<sphere>(center, 0.2, sphere_material);
                 } else {
                     // glass
                     sphere_material = std::make_shared<const dielectric>(1.5);
-                    world.add(sphere(center, 0.2, sphere_material));
+                    world.add<sphere>(center, 0.2, sphere_material);
                 }
             }
         }
     }
 
     auto material1 = std::make_shared<const dielectric>(1.5);
-    world.add(sphere(point3(0, 1, 0), 1.0, material1));
+    world.add<sphere>(point3(0, 1, 0), 1.0, material1);
 
     auto material2 = std::make_shared<const lambertian>(color3(0.4, 0.2, 0.1));
-    world.add(sphere(point3(-4, 1, 0), 1.0, material2));
+    world.add<sphere>(point3(-4, 1, 0), 1.0, material2);
 
     auto material3 = std::make_shared<const metal>(color3(0.7, 0.6, 0.5), 0.0);
-    world.add(sphere(point3(4, 1, 0), 1.0, material3));
+    world.add<sphere>(point3(4, 1, 0), 1.0, material3);
 
     camera cam;
 
@@ -67,9 +69,9 @@ void bouncing_spheres() {
     cam.focus_dist    = 10.0;
     cam.background_color = color3(0.70, 0.80, 1.00);
 
-    //bvh_node bvh(world);
-
-    cam.render(world);
+    std::vector<std::unique_ptr<bvh_node>> node_list;
+    bvh_node root = bvh_node(world, node_list);
+    cam.render(root);
 }
 
 void quads() {
@@ -83,11 +85,11 @@ void quads() {
     auto lower_teal   = std::make_shared<const lambertian>(color3(0.2, 0.8, 0.8));
 
     // Quads
-    world.add(quad(point3(-3,-2, 5), vec3(0, 0,-4), vec3(0, 4, 0), left_red));
-    world.add(quad(point3(-2,-2, 0), vec3(4, 0, 0), vec3(0, 4, 0), back_green));
-    world.add(quad(point3( 3,-2, 1), vec3(0, 0, 4), vec3(0, 4, 0), right_blue));
-    world.add(quad(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4), upper_orange));
-    world.add(quad(point3(-2,-3, 5), vec3(4, 0, 0), vec3(0, 0,-4), lower_teal));
+    world.add<quad>(point3(-3,-2, 5), vec3(0, 0,-4), vec3(0, 4, 0), left_red);
+    world.add<quad>(point3(-2,-2, 0), vec3(4, 0, 0), vec3(0, 4, 0), back_green);
+    world.add<quad>(point3( 3,-2, 1), vec3(0, 0, 4), vec3(0, 4, 0), right_blue);
+    world.add<quad>(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4), upper_orange);
+    world.add<quad>(point3(-2,-3, 5), vec3(4, 0, 0), vec3(0, 0,-4), lower_teal);
 
     camera cam;
 
@@ -104,9 +106,9 @@ void quads() {
 
     cam.defocus_angle = 0;
 
-//    bvh_node bvh(world);
-
-    cam.render(world);
+    std::vector<std::unique_ptr<bvh_node>> node_list;
+    bvh_node root = bvh_node(world, node_list);
+    cam.render(root);
 }
 
 void cornell_box() {
@@ -117,18 +119,18 @@ void cornell_box() {
     auto green = std::make_shared<const lambertian>(color3(.12, .45, .15));
     auto light = std::make_shared<const diffuse_light>(color3(15, 15, 15));
 
-    world.add(quad(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green));
-    world.add(quad(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red));
-    world.add(quad(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light));
-    world.add(quad(point3(0,0,0), vec3(555,0,0), vec3(0,0,555), white));
-    world.add(quad(point3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), white));
-    world.add(quad(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white));
+    world.add<quad>(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green);
+    world.add<quad>(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red);
+    world.add<quad>(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light);
+    world.add<quad>(point3(0,0,0), vec3(555,0,0), vec3(0,0,555), white);
+    world.add<quad>(point3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), white);
+    world.add<quad>(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white);
 
     camera cam;
 
     cam.aspect_ratio      = 16.0 / 9;
     cam.image_width       = 600;
-    cam.samples_per_pixel = 500;
+    cam.samples_per_pixel = 100;
     cam.max_depth         = 50;
 
     cam.vfov     = 40;
@@ -139,11 +141,13 @@ void cornell_box() {
 
     cam.defocus_angle = 0;
 
-    cam.render(world);
+    std::vector<std::unique_ptr<bvh_node>> node_list;
+    bvh_node root = bvh_node(world, node_list);
+    cam.render(root);
 }
 
 int main() {
     //bouncing_spheres();
-    quads();
-    //cornell_box();
+    //quads();
+    cornell_box();
 }

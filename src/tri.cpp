@@ -4,7 +4,7 @@
 #include <tiny/optional.h>
 #include "tri.h"
 
-tiny::optional<hit_record> tri::hit(const ray& r, interval ray_t) const noexcept {
+tiny::optional<hit_record> inner_tri::hit(const ray& r, interval ray_t) const noexcept {
     static constexpr hn::CappedTag<float, 4> d;
 
     // Load stored float arrays directly into SIMD registers — no element-wise construction

@@ -5,7 +5,7 @@
 #include "vec3.h"
 #include "aabb.h"
 
-class sphere {
+class sphere : public hittable {
 public:
     sphere(const point3& center, float radius, std::shared_ptr<const material> mat_ptr) noexcept : center(center, vec3(0,0,0)), radius(std::fmax(0,radius)), mat_ptr(mat_ptr) {
         vec3 radius_vec = vec3(radius, radius, radius);
@@ -18,8 +18,8 @@ public:
         bbox = aabb(bbox0, bbox1);
 
     }
-    tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept;
-    const aabb& bounding_box() const {
+    tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept override;
+    aabb bounding_box() const override {
         return bbox;
     }
 private:
