@@ -4,6 +4,7 @@ tiny-optional/1.5.2
 taskflow/4.0.0
 pcg-cpp/cci.20220409
 libspng/0.7.4
+barkeep/0.1.5
 
 [generators]
 CMakeDeps

@@ -25,8 +25,7 @@ tiny::optional<hit_record> hittable_list::hit(const ray &r, interval ray_t) cons
 }
 
 void bvh_node::init(std::vector<hittable*>& objects, size_t start, size_t end) {
-//    int axis = random_int(0, 2);
-    int axis = 0;
+    int axis = random_int(0, 2);
 
     auto comparator = (axis == 0) ? box_x_compare
         : (axis == 1) ? box_y_compare
@@ -51,7 +50,8 @@ void bvh_node::init(std::vector<hittable*>& objects, size_t start, size_t end) {
 }
 
 tiny::optional<hit_record> bvh_node::hit(const ray& r, interval ray_t) const noexcept {
-    if (!bbox.hit(r, ray_t)) return std::nullopt;
+    if (!bbox.hit(r, ray_t)) 
+        return std::nullopt;
 
     auto hit_left = left->hit(r, ray_t);
     if (!right) return hit_left;
@@ -59,5 +59,3 @@ tiny::optional<hit_record> bvh_node::hit(const ray& r, interval ray_t) const noe
     auto hit_right = right->hit(r, interval(ray_t.min, hit_left ? hit_left->t : ray_t.max));
     return hit_right ? hit_right : hit_left;
 }
-
-

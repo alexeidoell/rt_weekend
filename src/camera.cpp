@@ -10,6 +10,7 @@
 #include <new>
 #include <print>
 #include <spng.h>
+#include <barkeep/barkeep.h>
 
 int writeout(spng_ctx* ctx, void* user, void* data, size_t length) {
     static std::ofstream strm("test.png");
@@ -46,6 +47,14 @@ void camera::render(const hittable& world) {
         render_threads[i] = std::thread(&camera::thread_render<false>, camera_ptr, std::cref(world));
     }
 
+    auto bar = barkeep::ProgressBar([&] { return image_height * image_width / pixel_count - render_tasks.size(); }, {
+            .total = image_width * image_height / pixel_count,
+            .speed = 1.,
+            .speed_unit = "chunks/s",
+            .style = barkeep::ProgressBarStyle::Rich,
+            .interval = std::chrono::milliseconds(100),
+            });
+    bar->show();
     thread_render<true>(world);
      
 
@@ -109,6 +118,7 @@ void camera::thread_render(const hittable& world) {
         std::optional<int> task;
         if constexpr (owner) {
             task = render_tasks.pop();
+//            std::print("{}% complete\n", 100 - (render_tasks.size() * pixel_count * 100 / (image_width * image_height)));
         } else {
             task = render_tasks.steal();
         }
