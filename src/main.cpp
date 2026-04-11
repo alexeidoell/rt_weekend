@@ -12,7 +12,7 @@
 
 void bouncing_spheres() {
 
-    hittable_list<sphere, quad, tri> world;
+    hittable_list<sphere, quad, tri> world ;
 
     auto ground_material = std::make_shared<const lambertian>(color3(0.5, 0.5, 0.5));
     world.add<sphere>(point3(0,-1000,0), 1000, ground_material);

@@ -51,6 +51,10 @@ public:
         return bbox;
     }
 
+    ~hittable_list() {
+        exit(-1);
+    }
+
 private:
     aabb bbox;
 };
@@ -59,7 +63,7 @@ template<hittable_concept... hittables>
 class bvh_node : public hittable {
 public:
     // Calls list.build() automatically before constructing.
-    bvh_node(hittable_list<hittables...> list, std::vector<std::unique_ptr<bvh_node>>& node_list) : node_list(node_list) {
+    bvh_node(hittable_list<hittables...>& list, std::vector<std::unique_ptr<bvh_node>>& node_list) : node_list(node_list) {
         list.build();
         init(list.objects, 0, list.objects.size());
     }
@@ -127,7 +131,6 @@ constexpr std::variant<hittables*..., bvh_node<hittables...>*> variant_convert(c
     if (quad_ptr) {
         return *quad_ptr;
     }
-    return (bvh_node<hittables...>*)nullptr;
 }
 
 template<hittable_concept... hittables>
@@ -172,7 +175,7 @@ tiny::optional<hit_record> bvh_node<hittables...>::hit(const ray& r, interval ra
     auto tmp_right = variant_convert(&right);
 
     auto hit_left = std::visit([&](auto&& arg) { return arg->hit(r, ray_t); }, tmp_left);
-    if (std::visit([](auto&& arg){ return arg == nullptr; }, tmp_right)) { return hit_left; }
+    if (std::visit([=](auto arg){ return arg == nullptr; }, tmp_right)) { return hit_left; }
 
     auto hit_right = std::visit([&](auto&& arg) { return arg->hit(r, interval(ray_t.min, hit_left ? hit_left->t : ray_t.max)); }, tmp_right);
     return hit_right ? hit_right : hit_left;
