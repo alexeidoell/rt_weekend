@@ -5,6 +5,7 @@
 #include "sphere.h"
 #include "tri.h"
 #include <tuple>
+#include <utility>
 #include <variant>
 #include <vector>
 #include <algorithm>
@@ -106,6 +107,29 @@ tiny::optional<hit_record> hittable_list<hittables...>::hit(const ray &r, interv
     */
 }
 
+
+template<hittable_concept... hittables>
+constexpr std::variant<hittables*..., bvh_node<hittables...>*> variant_convert(const std::variant<std::variant<hittables*...>, bvh_node<hittables...>*>* variant) noexcept {
+    auto bvh_ptr = std::get_if<bvh_node<hittables...>*>(variant);
+    if (bvh_ptr) {
+        return *bvh_ptr;
+    }
+    auto obj = std::get_if<std::variant<hittables*...>>(variant);
+    auto sphere_ptr = std::get_if<sphere*>(obj);
+    if (sphere_ptr) {
+        return *sphere_ptr;
+    }
+    auto tri_ptr = std::get_if<tri*>(obj);
+    if (tri_ptr) {
+        return *tri_ptr;
+    }
+    auto quad_ptr = std::get_if<quad*>(obj);
+    if (quad_ptr) {
+        return *quad_ptr;
+    }
+    return (bvh_node<hittables...>*)nullptr;
+}
+
 template<hittable_concept... hittables>
 void bvh_node<hittables...>::init(std::vector<std::variant<hittables*...>>& objects, size_t start, size_t end) {
     int axis = random_int(0, 2);
@@ -118,22 +142,24 @@ void bvh_node<hittables...>::init(std::vector<std::variant<hittables*...>>& obje
 
     if (object_span == 1) {
         left = objects[start];
-        right = (sphere*)nullptr;
+        right = (bvh_node*)nullptr;
     } else if (object_span == 2) {
         left = objects[start];
         right = objects[start + 1];
     } else {
 //        std::sort(objects.begin() + start, objects.begin() + end, comparator);
         auto mid = start + object_span / 2;
-        left = std::variant<hittables...>(node_list.emplace_back(std::make_unique<bvh_node>(objects, start, mid, node_list)).get());
-        right = std::variant<hittables...>(node_list.emplace_back(std::make_unique<bvh_node>(objects, mid, end, node_list)).get());
+        left = node_list.emplace_back(std::make_unique<bvh_node>(objects, start, mid, node_list)).get();
+        right = node_list.emplace_back(std::make_unique<bvh_node>(objects, mid, end, node_list)).get();
     }
 
-    
-    if (std::visit([](auto&& arg){ return arg != nullptr; }, right)) {
-        bbox = aabb(std::visit([](auto&& arg){ return arg->bounding_box(); }, left), std::visit([](auto&& arg){ return arg->bounding_box(); }, right));
+    auto tmp_left = variant_convert(&left);
+    auto tmp_right = variant_convert(&right);
+
+    if (std::visit([](auto&& arg){ return arg != nullptr; }, tmp_right)) {
+        bbox = aabb(std::visit([](auto&& arg){ return arg->bounding_box(); }, tmp_left), std::visit([](auto&& arg){ return arg->bounding_box(); }, tmp_right));
     } else {
-        bbox = std::visit([](auto&& arg){ return arg->bounding_box(); }, left);
+        bbox = std::visit([](auto&& arg){ return arg->bounding_box(); }, tmp_left);
     }
 }
 
@@ -142,9 +168,12 @@ tiny::optional<hit_record> bvh_node<hittables...>::hit(const ray& r, interval ra
     if (!bbox.hit(r, ray_t)) 
         return std::nullopt;
 
-    auto hit_left = left->hit(r, ray_t);
-    if (!right) return hit_left;
+    auto tmp_left = variant_convert(&left);
+    auto tmp_right = variant_convert(&right);
 
-    auto hit_right = right->hit(r, interval(ray_t.min, hit_left ? hit_left->t : ray_t.max));
+    auto hit_left = std::visit([&](auto&& arg) { return arg->hit(r, ray_t); }, tmp_left);
+    if (std::visit([](auto&& arg){ return arg == nullptr; }, tmp_right)) { return hit_left; }
+
+    auto hit_right = std::visit([&](auto&& arg) { return arg->hit(r, interval(ray_t.min, hit_left ? hit_left->t : ray_t.max)); }, tmp_right);
     return hit_right ? hit_right : hit_left;
 }
