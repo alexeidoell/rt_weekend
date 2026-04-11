@@ -51,10 +51,6 @@ public:
         return bbox;
     }
 
-    ~hittable_list() {
-        exit(-1);
-    }
-
 private:
     aabb bbox;
 };
@@ -77,17 +73,19 @@ public:
 private:
     void init(std::vector<std::variant<hittables*...>> &objects, size_t start, size_t end);
 
-    std::variant<std::variant<hittables*...>, bvh_node*> left = (bvh_node*)nullptr;
-    std::variant<std::variant<hittables*...>, bvh_node*> right = (bvh_node*)nullptr;
+    std::variant<hittables*..., bvh_node*> left = (bvh_node*)nullptr;
+    std::variant<hittables*..., bvh_node*> right = (bvh_node*)nullptr;
     std::vector<std::unique_ptr<bvh_node>>& node_list;
     aabb bbox;
 
-    static bool box_compare(hittable* a, hittable* b, int axis_index) {
-        return a->bounding_box().axis_interval(axis_index).min < b->bounding_box().axis_interval(axis_index).min;
+    static bool box_compare(std::variant<hittables*...>& a, std::variant<hittables*...>& b, int axis_index) {
+        aabb a_bbox = std::visit([](auto&& arg){ return arg->bounding_box(); }, a);
+        aabb b_bbox = std::visit([](auto&& arg){ return arg->bounding_box(); }, b);
+        return a_bbox.axis_interval(axis_index).min < b_bbox.axis_interval(axis_index).min;
     }
-    static bool box_x_compare(hittable* a, hittable* b) { return box_compare(a, b, 0); }
-    static bool box_y_compare(hittable* a, hittable* b) { return box_compare(a, b, 1); }
-    static bool box_z_compare(hittable* a, hittable* b) { return box_compare(a, b, 2); }
+    static bool box_x_compare(std::variant<hittables*...>& a, std::variant<hittables*...>& b) { return box_compare(a, b, 0); }
+    static bool box_y_compare(std::variant<hittables*...>& a, std::variant<hittables*...>& b) { return box_compare(a, b, 1); }
+    static bool box_z_compare(std::variant<hittables*...>& a, std::variant<hittables*...>& b) { return box_compare(a, b, 2); }
 };
 
 
@@ -143,26 +141,29 @@ void bvh_node<hittables...>::init(std::vector<std::variant<hittables*...>>& obje
 
     size_t object_span = end - start;
 
+    std::variant<std::variant<hittables*...>, bvh_node*> tmp_left = (bvh_node*)nullptr;
+    std::variant<std::variant<hittables*...>, bvh_node*> tmp_right = (bvh_node*)nullptr;
+
     if (object_span == 1) {
-        left = objects[start];
-        right = (bvh_node*)nullptr;
+        tmp_left = objects[start];
+        tmp_right = (bvh_node*)nullptr;
     } else if (object_span == 2) {
-        left = objects[start];
-        right = objects[start + 1];
+        tmp_left = objects[start];
+        tmp_left = objects[start + 1];
     } else {
-//        std::sort(objects.begin() + start, objects.begin() + end, comparator);
+        std::sort(objects.begin() + start, objects.begin() + end, comparator);
         auto mid = start + object_span / 2;
-        left = node_list.emplace_back(std::make_unique<bvh_node>(objects, start, mid, node_list)).get();
-        right = node_list.emplace_back(std::make_unique<bvh_node>(objects, mid, end, node_list)).get();
+        tmp_left = node_list.emplace_back(std::make_unique<bvh_node>(objects, start, mid, node_list)).get();
+        tmp_right = node_list.emplace_back(std::make_unique<bvh_node>(objects, mid, end, node_list)).get();
     }
 
-    auto tmp_left = variant_convert(&left);
-    auto tmp_right = variant_convert(&right);
+    left = variant_convert(&tmp_left);
+    right = variant_convert(&tmp_right);
 
-    if (std::visit([](auto&& arg){ return arg != nullptr; }, tmp_right)) {
-        bbox = aabb(std::visit([](auto&& arg){ return arg->bounding_box(); }, tmp_left), std::visit([](auto&& arg){ return arg->bounding_box(); }, tmp_right));
+    if (std::visit([](auto&& arg){ return arg != nullptr; }, right)) {
+        bbox = aabb(std::visit([](auto&& arg){ return arg->bounding_box(); }, left), std::visit([](auto&& arg){ return arg->bounding_box(); }, right));
     } else {
-        bbox = std::visit([](auto&& arg){ return arg->bounding_box(); }, tmp_left);
+        bbox = std::visit([](auto&& arg){ return arg->bounding_box(); }, left);
     }
 }
 
@@ -171,12 +172,9 @@ tiny::optional<hit_record> bvh_node<hittables...>::hit(const ray& r, interval ra
     if (!bbox.hit(r, ray_t)) 
         return std::nullopt;
 
-    auto tmp_left = variant_convert(&left);
-    auto tmp_right = variant_convert(&right);
+    auto hit_left = std::visit([&](auto&& arg) { return arg->hit(r, ray_t); }, left);
+    if (std::visit([&](auto arg){ return arg == nullptr; }, right)) { return hit_left; }
 
-    auto hit_left = std::visit([&](auto&& arg) { return arg->hit(r, ray_t); }, tmp_left);
-    if (std::visit([=](auto arg){ return arg == nullptr; }, tmp_right)) { return hit_left; }
-
-    auto hit_right = std::visit([&](auto&& arg) { return arg->hit(r, interval(ray_t.min, hit_left ? hit_left->t : ray_t.max)); }, tmp_right);
+    auto hit_right = std::visit([&](auto&& arg) { return arg->hit(r, interval(ray_t.min, hit_left ? hit_left->t : ray_t.max)); }, right);
     return hit_right ? hit_right : hit_left;
 }
