@@ -6,6 +6,7 @@
 #include <vector>
 #include "color3.h"
 #include "hittable.h"
+#include "hittable_list.h"
 #include "vec3.h"
 #include "taskflow/core/wsq.hpp"
 #include "material.h"

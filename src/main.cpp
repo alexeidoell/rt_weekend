@@ -12,7 +12,7 @@
 
 void bouncing_spheres() {
 
-    hittable_list world;
+    hittable_list<sphere, quad, tri> world;
 
     auto ground_material = std::make_shared<const lambertian>(color3(0.5, 0.5, 0.5));
     world.add<sphere>(point3(0,-1000,0), 1000, ground_material);
@@ -69,13 +69,13 @@ void bouncing_spheres() {
     cam.focus_dist    = 10.0;
     cam.background_color = color3(0.70, 0.80, 1.00);
 
-    std::vector<std::unique_ptr<bvh_node>> node_list;
+    std::vector<std::unique_ptr<bvh_node<sphere, quad, tri>>> node_list;
     bvh_node root = bvh_node(world, node_list);
     cam.render(root);
 }
 
 void quads() {
-    hittable_list world;
+    hittable_list<sphere, quad, tri> world;
 
     // Materials
     auto left_red     = std::make_shared<const lambertian>(color3(1.0, 0.2, 0.2));
@@ -106,13 +106,13 @@ void quads() {
 
     cam.defocus_angle = 0;
 
-    std::vector<std::unique_ptr<bvh_node>> node_list;
+    std::vector<std::unique_ptr<bvh_node<sphere, quad, tri>>> node_list;
     bvh_node root = bvh_node(world, node_list);
     cam.render(root);
 }
 
 void cornell_box() {
-    hittable_list world;
+    hittable_list<sphere, quad, tri> world;
 
     auto red   = std::make_shared<const lambertian>(color3(.65, .05, .05));
     auto white = std::make_shared<const lambertian>(color3(.73, .73, .73));
@@ -141,7 +141,7 @@ void cornell_box() {
 
     cam.defocus_angle = 0;
 
-    std::vector<std::unique_ptr<bvh_node>> node_list;
+    std::vector<std::unique_ptr<bvh_node<sphere, quad, tri>>> node_list;
     bvh_node root = bvh_node(world, node_list);
     cam.render(root);
 }
