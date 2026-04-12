@@ -2,6 +2,7 @@
 
 #include "aabb.h"
 #include "hittable.h"
+#include "interval.h"
 #include "sphere.h"
 #include "tri.h"
 #include <tuple>
@@ -32,14 +33,14 @@ public:
 
     // Call after all adds. Populates objects[] and recomputes bbox.
     void build() noexcept {
-        std::apply([&](auto&... vecs) {
+        std::apply([&](auto&&... vecs) {
                 (build_one(vecs), ...);
                 }, data);
     }
 
     template<typename T>
     void build_one(std::vector<T>& vec) noexcept {
-        for (auto& obj : vec) {
+        for (auto&& obj : vec) {
             objects.push_back(&obj);
         }
     }
@@ -76,16 +77,18 @@ private:
     std::variant<hittables*..., bvh_node*> left = (bvh_node*)nullptr;
     std::variant<hittables*..., bvh_node*> right = (bvh_node*)nullptr;
     std::vector<std::unique_ptr<bvh_node>>& node_list;
+    bool single_leaf = false;
     aabb bbox;
 
-    static bool box_compare(std::variant<hittables*...>& a, std::variant<hittables*...>& b, int axis_index) {
+    template <int axis_index>
+    static bool box_compare(std::variant<hittables*...>& a, std::variant<hittables*...>& b) {
         aabb a_bbox = std::visit([](auto&& arg){ return arg->bounding_box(); }, a);
         aabb b_bbox = std::visit([](auto&& arg){ return arg->bounding_box(); }, b);
-        return a_bbox.axis_interval(axis_index).min < b_bbox.axis_interval(axis_index).min;
+        return a_bbox.axis_interval<axis_index>().min < b_bbox.axis_interval<axis_index>().min;
     }
-    static bool box_x_compare(std::variant<hittables*...>& a, std::variant<hittables*...>& b) { return box_compare(a, b, 0); }
-    static bool box_y_compare(std::variant<hittables*...>& a, std::variant<hittables*...>& b) { return box_compare(a, b, 1); }
-    static bool box_z_compare(std::variant<hittables*...>& a, std::variant<hittables*...>& b) { return box_compare(a, b, 2); }
+    static bool box_x_compare(std::variant<hittables*...>& a, std::variant<hittables*...>& b) { return box_compare<0>(a, b); }
+    static bool box_y_compare(std::variant<hittables*...>& a, std::variant<hittables*...>& b) { return box_compare<1>(a, b); }
+    static bool box_z_compare(std::variant<hittables*...>& a, std::variant<hittables*...>& b) { return box_compare<2>(a, b); }
 };
 
 
@@ -129,6 +132,7 @@ constexpr std::variant<hittables*..., bvh_node<hittables...>*> variant_convert(c
     if (quad_ptr) {
         return *quad_ptr;
     }
+    std::unreachable();
 }
 
 template<hittable_concept... hittables>
@@ -146,21 +150,24 @@ void bvh_node<hittables...>::init(std::vector<std::variant<hittables*...>>& obje
 
     if (object_span == 1) {
         tmp_left = objects[start];
-        tmp_right = (bvh_node*)nullptr;
+        single_leaf = true;
+        left = variant_convert(&tmp_left);
     } else if (object_span == 2) {
         tmp_left = objects[start];
-        tmp_left = objects[start + 1];
+        tmp_right = objects[start + 1];
+        left = variant_convert(&tmp_left);
+        right = variant_convert(&tmp_right);
     } else {
         std::sort(objects.begin() + start, objects.begin() + end, comparator);
         auto mid = start + object_span / 2;
         tmp_left = node_list.emplace_back(std::make_unique<bvh_node>(objects, start, mid, node_list)).get();
         tmp_right = node_list.emplace_back(std::make_unique<bvh_node>(objects, mid, end, node_list)).get();
+        left = variant_convert(&tmp_left);
+        right = variant_convert(&tmp_right);
     }
 
-    left = variant_convert(&tmp_left);
-    right = variant_convert(&tmp_right);
 
-    if (std::visit([](auto&& arg){ return arg != nullptr; }, right)) {
+    if (!single_leaf) {
         bbox = aabb(std::visit([](auto&& arg){ return arg->bounding_box(); }, left), std::visit([](auto&& arg){ return arg->bounding_box(); }, right));
     } else {
         bbox = std::visit([](auto&& arg){ return arg->bounding_box(); }, left);
@@ -173,8 +180,11 @@ tiny::optional<hit_record> bvh_node<hittables...>::hit(const ray& r, interval ra
         return std::nullopt;
 
     auto hit_left = std::visit([&](auto&& arg) { return arg->hit(r, ray_t); }, left);
-    if (std::visit([&](auto arg){ return arg == nullptr; }, right)) { return hit_left; }
+    if (single_leaf) {
+        return hit_left;
+    }
 
-    auto hit_right = std::visit([&](auto&& arg) { return arg->hit(r, interval(ray_t.min, hit_left ? hit_left->t : ray_t.max)); }, right);
-    return hit_right ? hit_right : hit_left;
+    auto new_interval = interval(ray_t.min, hit_left ? hit_left->t : ray_t.max);
+    auto hit_right = std::visit([&](auto&& arg) { return arg->hit(r, new_interval); }, right);
+    return hit_right ?: hit_left;
 }

@@ -72,8 +72,6 @@ void bouncing_spheres() {
     std::vector<std::unique_ptr<bvh_node<sphere, quad, tri>>> node_list;
     bvh_node root = bvh_node(world, node_list);
     cam.render(root);
-
-        std::println("Nodes: {}", node_list.size());
 }
 
 void quads() {

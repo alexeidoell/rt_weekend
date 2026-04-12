@@ -45,8 +45,10 @@ class aabb { // axis aligned bounding box
         pad_to_minimums();
     }
 
-    const interval axis_interval(int n) const {
-        switch (n) {
+    
+    template<int axis_num>
+    constexpr interval axis_interval() const {
+        switch (axis_num) {
             case 0: return interval(min_vec.raw[0], max_vec.raw[0]);
             case 1: return interval(min_vec.raw[1], max_vec.raw[1]);
             case 2: return interval(min_vec.raw[2], max_vec.raw[2]);
@@ -98,7 +100,7 @@ class aabb { // axis aligned bounding box
     */
 
 
-    bool hit(const ray& r, interval& ray_t) const {
+    bool hit(const ray& r, interval ray_t) const {
         const point3& ray_orig = r.origin();
         const vec3&   ray_dir  = r.direction();
 
