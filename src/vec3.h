@@ -8,6 +8,7 @@
 // ???
 class vec3 {
 public:
+    using Tag = hn::CappedTag<float, 4>;
     vec3();
     vec3(float e0, float e1, float e2);
     vec3(hn::Vec128<float> vec);
@@ -32,6 +33,8 @@ public:
     static vec3 random(float min, float max);
 
     hn::Vec128<float> vec;
+    static constexpr Tag d{};
+    static constexpr Tag get_tag() { return d; }
 };
 
 using point3 = vec3;

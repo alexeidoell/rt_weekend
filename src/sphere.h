@@ -21,6 +21,7 @@ public:
         aabb bbox1 = aabb(center2 - radius_vec, center2 + radius_vec);
         return aabb(bbox0, bbox1);
     }
+    static uv get_sphere_uv(const point3& p);
 private:
     internal_ray center;
     float radius;

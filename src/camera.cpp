@@ -165,7 +165,7 @@ color3 camera::ray_color(const ray& r, const hittable& world, int depth) const {
     if (!scatter_result) {
         return emitted;
     }
-    return color3(hn::MulAdd(mat_ptr->get_albedo().vec, ray_color(*scatter_result, world, depth + 1).vec, emitted.vec));
+    return color3(hn::MulAdd(mat_ptr->get_albedo(*rec).vec, ray_color(*scatter_result, world, depth + 1).vec, emitted.vec));
 
 }
 

@@ -1,18 +1,20 @@
 #pragma once
 
 
+#include <memory>
 #include <tiny/optional.h>
 #include <utility>
 #include "common.h"
 #include "color3.h"
 #include "hittable.h"
+#include "texture.h"
 #include "vec3.h"
 
 class material {
 public:
     virtual ~material() = default;
 
-    inline virtual color3 get_albedo() const {
+    inline virtual color3 get_albedo(const hit_record& rec) const {
         return color3(0,0,0);
     };
 
@@ -27,13 +29,14 @@ public:
 
 class lambertian : public material {
 public:
-    lambertian(const color3& albedo) : albedo(albedo) {}
+    lambertian(const color3& albedo) : tex(std::make_shared<solid_color>(albedo)) {}
+    lambertian(std::shared_ptr<texture> tex) : tex(tex) {}
     tiny::optional<ray> scatter(const ray& r_in, const hit_record& rec) const override;
-    inline color3 get_albedo() const override {
-        return albedo;
+    inline color3 get_albedo(const hit_record& rec) const override {
+        return tex->value(rec.u, rec.v, rec.p);
     }
 private:
-    color3 albedo;
+    std::shared_ptr<texture> tex;
 
 
 };
@@ -43,7 +46,7 @@ class metal : public material {
     metal(const color3& albedo, float fuzz) : albedo(albedo), fuzz(fuzz < 1 ? fuzz : 1) {}
 
     tiny::optional<ray> scatter(const ray& r_in, const hit_record& rec) const override;
-    inline color3 get_albedo() const override {
+    inline color3 get_albedo(const hit_record& rec) const override {
         return albedo;
     }
   private:
@@ -56,7 +59,7 @@ public:
     dielectric(float refraction_index) : refraction_index(refraction_index) {}
 
     tiny::optional<ray> scatter(const ray& r_in, const hit_record& rec) const override;
-    inline color3 get_albedo() const override {
+    inline color3 get_albedo(const hit_record& rec) const override {
         return color3(1,1,1);
     }
 private:

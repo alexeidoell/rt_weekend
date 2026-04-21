@@ -4,12 +4,12 @@
 #include <cmath>
 
 vec3::vec3() {
-    vec = hn::Set(hn::CappedTag<float, 4>(), 0.f);
+    vec = hn::Set(d, 0.f);
 }
 
 vec3::vec3(float e0, float e1, float e2) {
     float arr[4] = {e0, e1, e2, 0.f};
-    vec = hn::LoadN(hn::CappedTag<float, 4>(), arr, 3);
+    vec = hn::LoadN(d, arr, 3);
 }
 
 vec3::vec3(hn::Vec128<float> vec) : vec(vec) {
@@ -29,7 +29,7 @@ vec3& vec3::operator+=(const vec3& v) {
 }
 
 vec3& vec3::operator*=(float t) {
-    vec = hn::Mul(vec, hn::Set(hn::CappedTag<float, 4>(), t));
+    vec = hn::Mul(vec, hn::Set(d, t));
     return *this;
 }
 
@@ -47,7 +47,6 @@ float vec3::length_squared() const {
 
 bool vec3::near_zero() const {
     const float s = 1e-8f;
-    const hn::CappedTag<float, 4> d;
     auto comp = hn::Set(d, s);
     auto result = hn::Lt(vec, comp);
     return hn::AllTrue(d, result);
@@ -78,7 +77,8 @@ vec3 operator*(const vec3& u, const vec3& v) {
 }
 
 vec3 operator*(float t, const vec3& v) {
-    return vec3(hn::Mul(hn::Set(hn::CappedTag<float, 4>(), t), v.vec));
+    static constexpr auto d = vec3::get_tag();
+    return vec3(hn::Mul(hn::Set(d, t), v.vec));
 }
 
 vec3 operator*(const vec3& v, float t) {
@@ -90,7 +90,8 @@ vec3 operator/(const vec3& v, float t) {
 }
 
 bool operator==(const vec3& u, const vec3& v) {
-    return hn::AllTrue(hn::CappedTag<float, 4>(), hn::Eq(u.vec, v.vec));
+    static constexpr auto d = vec3::get_tag();
+    return hn::AllTrue(d, hn::Eq(u.vec, v.vec));
 }
 
 float dot(const vec3& u, const vec3& v) {
@@ -98,7 +99,7 @@ float dot(const vec3& u, const vec3& v) {
 }
 
 hn::Vec128<float> cross_vector_only(const hn::Vec128<float> u, const hn::Vec128<float> v) {
-    const hn::CappedTag<float, 4> d;
+    static constexpr auto d = vec3::get_tag();
     auto u_shuffled = hn::Per4LaneBlockShuffle<1, 0, 2, 1>(u);
     auto v_shuffled = hn::Per4LaneBlockShuffle<1, 0, 2, 1>(v);
     auto right = Mul(hn::SlideDownLanes(d, u_shuffled, 1), v_shuffled);

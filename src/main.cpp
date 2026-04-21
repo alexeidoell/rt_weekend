@@ -1,5 +1,6 @@
 #include "camera.h"
 #include "material.h"
+#include "texture.h"
 #include "tri.h"
 #include "vec3.h"
 #include "color3.h"
@@ -17,7 +18,9 @@ void bouncing_spheres() {
 
     hittable_list world;
 
-    auto ground_material = new lambertian(color3(0.5, 0.5, 0.5));
+    auto checker = std::make_shared<checker_texture>(0.32, color3(0.2, 0.3, 0.1), color3(0.9, 0.9, 0.9));
+
+    auto ground_material = new lambertian(checker);
     world.add<sphere>(point3(0,-1000,0), 1000, ground_material);
     for (int a = -11; a < 11; a++) {
         for (int b = -11; b < 11; b++) {
@@ -140,7 +143,65 @@ void cornell_box() {
     cam.lookfrom = point3(278, 278, -800);
     cam.lookat   = point3(278, 278, 0);
     cam.vup      = vec3(0,1,0);
-    cam.background_color = color3(0, 0, 0);
+    cam.background_color = color3(0.70, 0.80, 1.00);
+
+    cam.defocus_angle = 0;
+
+    std::vector<std::unique_ptr<bvh_node>> node_list;
+    bvh_node root = bvh_node(world, node_list);
+    cam.render(root);
+}
+
+void perlin_spheres() {
+    hittable_list world;
+
+    auto pertext = std::make_shared<noise_texture>();
+    auto mat = new lambertian(pertext);
+    world.add<sphere>(point3(0,-1000,0), 1000, mat);
+    world.add<sphere>(point3(0,2,0), 2, mat);
+
+    camera cam;
+
+    cam.aspect_ratio      = 16.0 / 9.0;
+    cam.image_width       = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth         = 50;
+
+    cam.vfov     = 20;
+    cam.lookfrom = point3(13,2,3);
+    cam.lookat   = point3(0,0,0);
+    cam.vup      = vec3(0,1,0);
+    cam.background_color = color3(0.70, 0.80, 1.00);
+
+    cam.defocus_angle = 0;
+
+    std::vector<std::unique_ptr<bvh_node>> node_list;
+    bvh_node root = bvh_node(world, node_list);
+    cam.render(root);
+}
+
+void checkered_spheres() {
+    hittable_list world;
+
+    auto checker = std::make_shared<checker_texture>(0.32, color3(.2, .3, .1), color3(.9, .9, .9));
+
+    auto checker_mat = new lambertian(checker);
+    world.add<sphere>(point3(0,-10, 0), 10, checker_mat);
+    world.add<sphere>(point3(0,10, 0), 10, checker_mat);
+
+    camera cam;
+
+    cam.aspect_ratio      = 16.0 / 9.0;
+    cam.image_width       = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth         = 50;
+
+    cam.vfov     = 20;
+    cam.lookfrom = point3(13,2,3);
+    cam.lookat   = point3(0,0,0);
+    cam.vup      = vec3(0,1,0);
+
+    cam.background_color = color3(0.70, 0.80, 1.00);
 
     cam.defocus_angle = 0;
 
@@ -150,7 +211,9 @@ void cornell_box() {
 }
 
 int main() {
-    bouncing_spheres();
+    //bouncing_spheres();
+    checkered_spheres();
     //quads();
     //cornell_box();
+    //perlin_spheres();
 }
