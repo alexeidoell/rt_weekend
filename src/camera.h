@@ -40,7 +40,7 @@ public:
 private:
     constexpr float calculate_viewport_height() {
         float theta = degrees_to_radians(vfov);
-        float h = std::tan(theta/2);
+        float h = std::tanf(theta/2);
         return 2 * h * focus_dist;
 
     }

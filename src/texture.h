@@ -27,14 +27,15 @@ class solid_color : public texture {
 
 class noise_texture : public texture {
   public:
-    noise_texture() {}
+    noise_texture(float scale) : scale(scale) {}
 
     color3 value(float u, float v, const point3& p) const override {
-        return color3(1,1,1) * noise.noise(p);
+        return color3(.5, .5, .5) * (1 + std::sin(scale * p.z() + 10 * noise.turb(p, 7)));
     }
 
   private:
     perlin noise; // 4kb...
+    float scale;
 };
 
 class checker_texture : public texture {

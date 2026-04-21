@@ -155,7 +155,7 @@ void cornell_box() {
 void perlin_spheres() {
     hittable_list world;
 
-    auto pertext = std::make_shared<noise_texture>();
+    auto pertext = std::make_shared<noise_texture>(4);
     auto mat = new lambertian(pertext);
     world.add<sphere>(point3(0,-1000,0), 1000, mat);
     world.add<sphere>(point3(0,2,0), 2, mat);
@@ -210,10 +210,44 @@ void checkered_spheres() {
     cam.render(root);
 }
 
+void simple_light() {
+    hittable_list world;
+
+    auto pertext = std::make_shared<noise_texture>(4);
+    auto mat = new lambertian(pertext);
+    world.add<sphere>(point3(0,-1000,0), 1000, mat);
+    world.add<sphere>(point3(0,2,0), 2, mat);
+
+    auto difflight = new diffuse_light(color3(4,4,4));
+    world.add<sphere>(point3(0,7,0), 2, difflight);
+    world.add<quad>(point3(3,1,-2), vec3(2,0,0), vec3(0,2,0), difflight);
+
+    camera cam;
+
+    cam.aspect_ratio      = 16.0 / 9.0;
+    cam.image_width       = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth         = 50;
+    cam.background_color = color3(0,0,0);
+
+    cam.vfov     = 20;
+    cam.lookfrom = point3(26,3,6);
+    cam.lookat   = point3(0,2,0);
+    cam.vup      = vec3(0,1,0);
+
+    cam.defocus_angle = 0;
+
+    std::vector<std::unique_ptr<bvh_node>> node_list;
+    bvh_node root = bvh_node(world, node_list);
+    cam.render(root);
+}
+
 int main() {
     //bouncing_spheres();
-    checkered_spheres();
+    //checkered_spheres();
     //quads();
     //cornell_box();
     //perlin_spheres();
+    simple_light();
+
 }

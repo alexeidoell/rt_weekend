@@ -1,6 +1,7 @@
 #include "ray.h"
 #include "vec3.h"
 #include "vectorization.h"
+#include "hittable.h"
 #include <tiny/optional.h>
 #include "tri.h"
 
@@ -46,7 +47,7 @@ tiny::optional<hit_record> inner_tri::hit(const ray& r, interval ray_t) const no
     if (b1 < 0 || b2 < 0 || b1 + b2 > 1.0f)
         return std::nullopt;
 
-    return tiny::make_optional<hit_record>(hit_point, t, mat_ptr, r, vec3(normal_v));
+    return tiny::make_optional<hit_record>(hit_point, t, mat_ptr, r, vec3(normal_v), uv{0.0, 0.0});
 }
 
 tiny::optional<hit_record> quad::hit(const ray& r, interval ray_t) const noexcept {

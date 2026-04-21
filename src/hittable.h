@@ -11,6 +11,10 @@ class material;
 struct uv {
     float u;
     float v;
+
+    uv(float u, float v) : u(u), v(v) {}
+    uv(const uv& other) = default;
+    uv(uv&& other) = default;
 };
 
 class hit_record { 
