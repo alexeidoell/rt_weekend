@@ -13,7 +13,7 @@ public:
     std::vector<sphere> spheres;
     std::vector<tri> tris;
     std::vector<quad> quads;
-    std::vector<hittable*> objects; // raw ptrs into above; populated by build()
+    std::vector<std::pair<hittable*, aabb>> objects; // raw ptrs into above; populated by build()
 
     hittable_list() noexcept {}
 
@@ -33,9 +33,9 @@ public:
     // Call after all adds. Populates objects[] and recomputes bbox.
     void build() noexcept {
         objects.clear();
-        for (auto& s : spheres) { objects.push_back(&s);  }
-        for (auto& t : tris)    { objects.push_back(&t);  }
-        for (auto& q : quads)   { objects.push_back(&q);  }
+        for (auto& s : spheres) { objects.emplace_back(&s, s.bounding_box());  }
+        for (auto& t : tris)    { objects.emplace_back(&t, t.bounding_box());  }
+        for (auto& q : quads)   { objects.emplace_back(&q, q.bounding_box());  }
     }
 
     tiny::optional<hit_record> hit(const ray& r, interval ray_t) const noexcept override;
@@ -55,7 +55,7 @@ public:
         list.build();
         init(list.objects, 0, list.objects.size());
     }
-    bvh_node(std::vector<hittable*>& objects, size_t start, size_t end, std::vector<std::unique_ptr<bvh_node>>& node_list) : node_list(node_list) {
+    bvh_node(std::vector<std::pair<hittable*, aabb>>& objects, size_t start, size_t end, std::vector<std::unique_ptr<bvh_node>>& node_list) : node_list(node_list) {
         init(objects, start, end);
     }
 
@@ -63,7 +63,7 @@ public:
     aabb bounding_box() const override { return bbox; }
 
 private:
-    void init(std::vector<hittable*>& objects, size_t start, size_t end);
+    void init(std::vector<std::pair<hittable*, aabb>>& objects, size_t start, size_t end);
 
     hittable* left = nullptr;
     hittable* right = nullptr;
@@ -73,7 +73,7 @@ private:
     static bool box_compare(hittable* a, hittable* b, int axis_index) {
         return a->bounding_box().axis_interval(axis_index).min < b->bounding_box().axis_interval(axis_index).min;
     }
-    static bool box_x_compare(hittable* a, hittable* b) { return box_compare(a, b, 0); }
-    static bool box_y_compare(hittable* a, hittable* b) { return box_compare(a, b, 1); }
-    static bool box_z_compare(hittable* a, hittable* b) { return box_compare(a, b, 2); }
+    static bool box_x_compare(const std::pair<hittable*, aabb>& a, const std::pair<hittable*, aabb>& b) { return box_compare(a.first, b.first, 0); }
+    static bool box_y_compare(const std::pair<hittable*, aabb>& a, const std::pair<hittable*, aabb>& b) { return box_compare(a.first, b.first, 1); }
+    static bool box_z_compare(const std::pair<hittable*, aabb>& a, const std::pair<hittable*, aabb>& b) { return box_compare(a.first, b.first, 2); }
 };

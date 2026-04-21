@@ -28,5 +28,7 @@ public:
     }
 };
 
-constexpr interval empty = interval(infinity, -infinity);
-constexpr interval universe = interval(-infinity, infinity);
+namespace const_interval {
+    static constexpr interval empty = interval(infinity, -infinity);
+    static constexpr interval universe = interval(-infinity, infinity);
+};

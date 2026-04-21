@@ -13,7 +13,7 @@ tiny::optional<hit_record> hittable_list::hit(const ray &r, interval ray_t) cons
     tiny::optional<hit_record> rec = std::nullopt;
     float closest = ray_t.max;
 
-    for (hittable* obj : objects) {
+    for (auto [obj, _] : objects) {
         auto temp = obj->hit(r, interval(ray_t.min, closest));
         if (temp) {
             closest = temp->t;
@@ -24,8 +24,13 @@ tiny::optional<hit_record> hittable_list::hit(const ray &r, interval ray_t) cons
     return rec;
 }
 
-void bvh_node::init(std::vector<hittable*>& objects, size_t start, size_t end) {
-    int axis = random_int(0, 2);
+void bvh_node::init(std::vector<std::pair<hittable*, aabb>>& objects, size_t start, size_t end) {
+    // bbox = const_aabb::empty; float operations that may result in any NaN are super super slow with vectors
+    bbox = objects[start].second;
+    for (size_t obj_idx = start + 1; obj_idx < end; obj_idx++) {
+        bbox = aabb(bbox, objects[obj_idx].second);
+    }
+    int axis = bbox.longest_axis();
 
     auto comparator = (axis == 0) ? box_x_compare
         : (axis == 1) ? box_y_compare
@@ -34,19 +39,18 @@ void bvh_node::init(std::vector<hittable*>& objects, size_t start, size_t end) {
     size_t object_span = end - start;
 
     if (object_span == 1) {
-        left = objects[start];
+        left = objects[start].first;
         right = nullptr;
     } else if (object_span == 2) {
-        left = objects[start];
-        right = objects[start + 1];
+        left = objects[start].first;
+        right = objects[start + 1].first;
     } else {
         std::sort(objects.begin() + start, objects.begin() + end, comparator);
         auto mid = start + object_span / 2;
-        left = node_list.emplace_back(std::make_unique<bvh_node>(objects, start, mid, node_list)).get();
-        right = node_list.emplace_back(std::make_unique<bvh_node>(objects, mid, end, node_list)).get();
+        left = node_list.emplace_back(std::move(std::make_unique<bvh_node>(objects, start, mid, node_list))).get();
+        right = node_list.emplace_back(std::move(std::make_unique<bvh_node>(objects, mid, end, node_list))).get();
     }
 
-    bbox = right ? aabb(left->bounding_box(), right->bounding_box()) : left->bounding_box();
 }
 
 tiny::optional<hit_record> bvh_node::hit(const ray& r, interval ray_t) const noexcept {

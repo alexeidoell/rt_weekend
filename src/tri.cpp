@@ -7,7 +7,7 @@
 tiny::optional<hit_record> inner_tri::hit(const ray& r, interval ray_t) const noexcept {
     static constexpr hn::CappedTag<float, 4> d;
 
-    // Load stored float arrays directly into SIMD registers — no element-wise construction
+    // Load stored float arrays directly into SIMD registers
     auto cross = cross_vector_only(u_e, v_e);
     auto len_squared = dot_packed(cross, cross);
     auto normal_v = hn::Mul(cross, hn::ApproximateReciprocalSqrt(hn::Set(d, len_squared)));
@@ -46,7 +46,7 @@ tiny::optional<hit_record> inner_tri::hit(const ray& r, interval ray_t) const no
     if (b1 < 0 || b2 < 0 || b1 + b2 > 1.0f)
         return std::nullopt;
 
-    return tiny::make_optional<hit_record>(hit_point, t, mat_ptr.get(), r, vec3(normal_v));
+    return tiny::make_optional<hit_record>(hit_point, t, mat_ptr, r, vec3(normal_v));
 }
 
 tiny::optional<hit_record> quad::hit(const ray& r, interval ray_t) const noexcept {

@@ -26,6 +26,6 @@ tiny::optional<hit_record> sphere::hit(const ray& r, interval ray_t) const noexc
     point3 hit_point = r.at(root);
     vec3 outward_normal = (hit_point - current_center) / radius;
 
-    return tiny::make_optional<hit_record>(hit_point, root, mat_ptr.get(), r, outward_normal);
+    return tiny::make_optional<hit_record>(hit_point, root, mat_ptr, r, outward_normal);
 }
 

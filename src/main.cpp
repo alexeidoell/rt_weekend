@@ -10,11 +10,14 @@
 #include <memory>
 #include <print>
 
+// should probably change this from just using a bunch of raw pointers but
+// I didn't wanna use shared pointers
+
 void bouncing_spheres() {
 
     hittable_list world;
 
-    auto ground_material = std::make_shared<const lambertian>(color3(0.5, 0.5, 0.5));
+    auto ground_material = new lambertian(color3(0.5, 0.5, 0.5));
     world.add<sphere>(point3(0,-1000,0), 1000, ground_material);
     for (int a = -11; a < 11; a++) {
         for (int b = -11; b < 11; b++) {
@@ -22,35 +25,35 @@ void bouncing_spheres() {
             point3 center(a + 0.9*random_double(), 0.2, b + 0.9*random_double());
 
             if ((center - point3(4, 0.2, 0)).length() > 0.9) {
-                std::shared_ptr<const material> sphere_material;
+                const material* sphere_material;
                 if (choose_mat < 0.8) {
                     // diffuse
                     auto albedo = color3::random() * color3::random();
-                    sphere_material = std::make_shared<const lambertian>(albedo);
+                    sphere_material = new lambertian(albedo);
                     auto center2 = center + vec3(0, random_double(0, 0.5), 0);
                     world.add<sphere>(center, center2, 0.2, sphere_material);
                 } else if (choose_mat < 0.95) {
                     // metal
                     auto albedo = color3::random(0.5, 1);
                     auto fuzz = random_double(0, 0.5);
-                    sphere_material = std::make_shared<const metal>(albedo, fuzz);
+                    sphere_material = new metal(albedo, fuzz);
                     world.add<sphere>(center, 0.2, sphere_material);
                 } else {
                     // glass
-                    sphere_material = std::make_shared<const dielectric>(1.5);
+                    sphere_material = new dielectric(1.5);
                     world.add<sphere>(center, 0.2, sphere_material);
                 }
             }
         }
     }
 
-    auto material1 = std::make_shared<const dielectric>(1.5);
+    auto material1 = new dielectric(1.5);
     world.add<sphere>(point3(0, 1, 0), 1.0, material1);
 
-    auto material2 = std::make_shared<const lambertian>(color3(0.4, 0.2, 0.1));
+    auto material2 = new lambertian(color3(0.4, 0.2, 0.1));
     world.add<sphere>(point3(-4, 1, 0), 1.0, material2);
 
-    auto material3 = std::make_shared<const metal>(color3(0.7, 0.6, 0.5), 0.0);
+    auto material3 = new metal(color3(0.7, 0.6, 0.5), 0.0);
     world.add<sphere>(point3(4, 1, 0), 1.0, material3);
 
     camera cam;
@@ -78,11 +81,11 @@ void quads() {
     hittable_list world;
 
     // Materials
-    auto left_red     = std::make_shared<const lambertian>(color3(1.0, 0.2, 0.2));
-    auto back_green   = std::make_shared<const lambertian>(color3(0.2, 1.0, 0.2));
-    auto right_blue   = std::make_shared<const lambertian>(color3(0.2, 0.2, 1.0));
-    auto upper_orange = std::make_shared<const lambertian>(color3(1.0, 0.5, 0.0));
-    auto lower_teal   = std::make_shared<const lambertian>(color3(0.2, 0.8, 0.8));
+    auto left_red     = new lambertian(color3(1.0, 0.2, 0.2));
+    auto back_green   = new lambertian(color3(0.2, 1.0, 0.2));
+    auto right_blue   = new lambertian(color3(0.2, 0.2, 1.0));
+    auto upper_orange = new lambertian(color3(1.0, 0.5, 0.0));
+    auto lower_teal   = new lambertian(color3(0.2, 0.8, 0.8));
 
     // Quads
     world.add<quad>(point3(-3,-2, 5), vec3(0, 0,-4), vec3(0, 4, 0), left_red);
@@ -114,10 +117,10 @@ void quads() {
 void cornell_box() {
     hittable_list world;
 
-    auto red   = std::make_shared<const lambertian>(color3(.65, .05, .05));
-    auto white = std::make_shared<const lambertian>(color3(.73, .73, .73));
-    auto green = std::make_shared<const lambertian>(color3(.12, .45, .15));
-    auto light = std::make_shared<const diffuse_light>(color3(15, 15, 15));
+    auto red   = new lambertian(color3(.65, .05, .05));
+    auto white = new lambertian(color3(.73, .73, .73));
+    auto green = new lambertian(color3(.12, .45, .15));
+    auto light = new diffuse_light(color3(15, 15, 15));
 
     world.add<quad>(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green);
     world.add<quad>(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red);

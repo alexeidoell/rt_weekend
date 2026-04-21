@@ -63,7 +63,14 @@ class aabb { // axis aligned bounding box
         min_vec = MaskedSubOr(min_vec, mask, deltas, min_vec);
         max_vec = MaskedAddOr(max_vec, mask, deltas, max_vec);
     }
-    
+
+    int longest_axis() const {
+        auto sizes = hn::Sub(max_vec, min_vec);
+        if (sizes.raw[0] > sizes.raw[1] && sizes.raw[0] > sizes.raw[2]) return 0;
+        if (sizes.raw[1] > sizes.raw[2]) return 1;
+        return 2;
+    }
+
       /*
     interval x, y, z;
 
@@ -138,3 +145,8 @@ class aabb { // axis aligned bounding box
         return true;
     }
 };
+
+namespace const_aabb {
+    static const aabb empty = aabb(const_interval::empty, const_interval::empty, const_interval::empty);
+    static const aabb universe = aabb(const_interval::universe, const_interval::universe, const_interval::universe);
+}
