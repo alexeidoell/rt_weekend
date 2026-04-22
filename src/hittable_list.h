@@ -4,6 +4,7 @@
 #include "hittable.h"
 #include "sphere.h"
 #include "tri.h"
+#include <print>
 #include <vector>
 #include <algorithm>
 #include <tiny/optional.h>
@@ -28,6 +29,19 @@ public:
          } else {
             tris.emplace_back(args...);
          }
+    }
+
+    void add(quad&& q) noexcept {
+        std::println("length of quads before add: {}", quads.size());
+        quads.push_back(q);
+    }
+
+    void add(tri&& t) noexcept {
+        tris.push_back(std::move(t));
+    }
+
+    void add(sphere&& s) noexcept {
+        spheres.push_back(std::move(s));
     }
 
     // Call after all adds. Populates objects[] and recomputes bbox.

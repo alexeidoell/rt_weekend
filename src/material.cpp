@@ -26,8 +26,8 @@ tiny::optional<ray> dielectric::scatter(const ray& r_in, const hit_record& rec) 
     float ri = rec.front_face ? (1.0/refraction_index) : refraction_index;
 
     vec3 unit_direction = unit_vector(r_in.direction());
-    float cos_theta = std::fmin(dot(-unit_direction, rec.normal), 1.0);
-    float sin_theta = std::sqrt(1.0 - cos_theta*cos_theta);
+    float cos_theta = std::fminf(dot(-unit_direction, rec.normal), 1.0);
+    float sin_theta = std::sqrtf(1.0 - cos_theta*cos_theta);
     vec3 direction;
 
     if (ri * sin_theta > 1.0 || reflectance(cos_theta, ri) > random_double()) { // cannot refract

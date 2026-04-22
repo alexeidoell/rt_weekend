@@ -111,7 +111,8 @@ vec3 cross(const vec3& u, const vec3& v) {
 }
 
 vec3 unit_vector(const vec3& v) {
-    return v * _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(v.length_squared())));
+    //return v * _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(v.length_squared())));
+    return v / v.length();
 }
 
 vec3 random_in_unit_disk() {

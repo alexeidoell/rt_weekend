@@ -55,3 +55,5 @@ public:
 private:
     inner_tri t1, t2;
 };
+
+std::vector<quad> make_box(const point3& a, const point3& b, const material* mat_ptr);

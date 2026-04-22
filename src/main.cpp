@@ -8,6 +8,7 @@
 #include "hittable_list.h"
 #include "common.h"
 #include "sphere.h"
+#include <iterator>
 #include <memory>
 #include <print>
 
@@ -132,10 +133,20 @@ void cornell_box() {
     world.add<quad>(point3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), white);
     world.add<quad>(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white);
 
+    auto box1 = make_box(point3(130,0,65), point3(295,165,230), white);
+    auto box2 = make_box(point3(265,0,295), point3(430,330,460), white);
+
+    for (auto it = std::make_move_iterator(box1.begin()); it != std::make_move_iterator(box1.end()); ++it) {
+        world.add(*it);
+    }
+    for (auto it = std::make_move_iterator(box2.begin()); it != std::make_move_iterator(box2.end()); ++it) {
+        world.add(*it);
+    }
+
     camera cam;
 
-    cam.aspect_ratio      = 16.0 / 9;
-    cam.image_width       = 600;
+    cam.aspect_ratio      = 1.0;
+    cam.image_width       = 400;
     cam.samples_per_pixel = 100;
     cam.max_depth         = 50;
 
@@ -143,7 +154,7 @@ void cornell_box() {
     cam.lookfrom = point3(278, 278, -800);
     cam.lookat   = point3(278, 278, 0);
     cam.vup      = vec3(0,1,0);
-    cam.background_color = color3(0.70, 0.80, 1.00);
+//    cam.background_color = color3(0.70, 0.80, 1.00);
 
     cam.defocus_angle = 0;
 
@@ -246,8 +257,8 @@ int main() {
     //bouncing_spheres();
     //checkered_spheres();
     //quads();
-    //cornell_box();
+    cornell_box();
     //perlin_spheres();
-    simple_light();
+    //simple_light();
 
 }
